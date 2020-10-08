@@ -135,11 +135,16 @@ void yyerror (const char* s) {
 
 void print_node (Node* node, int num) {
    while(num--) printf("  ");
-   printf("%s", node->name);
+   char* name = node->name;
+   printf("%s", name);
    if (node->child_list_head->next) 
-      printf("  (%d)",node->line_no);
-   // if (node->text) 
-      // printf(": %s", node->text);
+      printf(" (%d)", node->line_no);
+   if (node->text) {
+      if (!strcmp(name, "CHAR"))
+         printf(": %c", node->text[1]);
+      else
+         printf(": %s", node->text);
+   }
    printf("\n");
 }
 

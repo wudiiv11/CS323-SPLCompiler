@@ -23,11 +23,10 @@ unic                 u[0-9a-fA-F]{4}
 esc                  \\([\"\\/bfnrt]|{unic})
 scp                  [^"\\\x00-\x1f]
 char                 '[[:print:]]'
-empty                [ \t\b\r]
+empty                [ \t\b\r\n]
 
 %%
 
-"\n"                 { yycolno = 1;                                            }
 "struct"             { yylval = make_node("STRUCT", NULL,   0); return STRUCT; }
 "char"|"int"|"float" { yylval = make_node("TYPE",   yytext, 0); return TYPE;   }
 "if"                 { yylval = make_node("IF",     NULL,   0); return IF;     }
@@ -62,4 +61,5 @@ empty                [ \t\b\r]
 {char}               { yylval = make_node("CHAR",   yytext, 0); return CHAR;   }
 {id}                 { yylval = make_node("ID",     yytext, 0); return ID;     }
 {empty}              {                                                         }
+
 %%

@@ -10,13 +10,21 @@ typedef struct Node {
     int     line_no;
 } Node;
 
+char* str_copy(const char* src) {
+    if (!src) return NULL;
+    int len = strlen(src);
+    char* dest = malloc(len + 1);
+    strncpy(dest, src, len);
+    return dest;
+}
+
 Node* make_node(char* name, char* text, int line_no) {
     Node* node = (Node*) malloc (sizeof(Node));
     Node* child_head = (Node*) malloc (sizeof(Node));
     memset(node, 0, sizeof(Node));
     memset(child_head, 0, sizeof(Node));
     node->name = name;
-    node->text = text;
+    node->text = str_copy(text);
     node->line_no = line_no;
     node->child_list_head = child_head;
     return node;
