@@ -1,0 +1,5 @@
+bin
+lex.yy.c
+syntax.tab.*
+syntax.output
+test_*
