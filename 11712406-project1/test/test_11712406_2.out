@@ -1,0 +1,63 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        StructSpecifier (1)
+          STRUCT
+          ID: mYStru4ct
+          LC
+          DefList (2)
+            Def (2)
+              Specifier (2)
+                TYPE: int
+              DecList (2)
+                Dec (2)
+                  VarDec (2)
+                    ID: a
+              SEMI
+            DefList (3)
+              Def (3)
+                Specifier (3)
+                  TYPE: float
+                DecList (3)
+                  Dec (3)
+                    VarDec (3)
+                      ID: b
+                SEMI
+              DefList (4)
+                Def (4)
+                  Specifier (4)
+                    TYPE: char
+                  DecList (4)
+                    Dec (4)
+                      VarDec (4)
+                        ID: c
+                  SEMI
+          RC
+      ExtDecList (5)
+        VarDec (5)
+          VarDec (5)
+            ID: list
+          LB
+          INT: 3
+          RB
+      SEMI
+    ExtDefList (7)
+      ExtDef (7)
+        Specifier (7)
+          TYPE: int
+        ExtDecList (7)
+          VarDec (7)
+            ID: global_value
+        SEMI
+      ExtDefList (9)
+        ExtDef (9)
+          Specifier (9)
+            TYPE: int
+          FunDec (9)
+            ID: main
+            LP
+            RP
+          CompSt (9)
+            LC
+            RC

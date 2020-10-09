@@ -1,0 +1,11 @@
+struct mYStru4ct{
+    int a;
+    float b;
+    char c;
+}list[3];
+
+int global_value;
+
+int main() {
+    
+}

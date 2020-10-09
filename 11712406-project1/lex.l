@@ -3,6 +3,7 @@
     #include "syntax.tab.h"
     int yycolno = 1;
     int flag = 1;
+    void multiple_comment();
     #define YY_USER_ACTION \
         yylloc.first_line = yylineno; \
         yylloc.first_column = yycolno; \
@@ -27,6 +28,7 @@ empty                [ \t\b\r\n]
 wrong_id             [0-9]+{id}
 wrong_int            (0[xX][0-9]*[g-zG-Z]+)|(0[0-9]+)
 wrong_char           '[[:print:]]*'
+wrong_float          0[0-9]+{frac}
 
 %%
 
@@ -59,11 +61,28 @@ wrong_char           '[[:print:]]*'
 "]"                  { yylval = make_node("RB",     NULL,   0); return RB;     }
 "{"                  { yylval = make_node("LC",     NULL,   0); return LC;     }
 "}"                  { yylval = make_node("RC",     NULL,   0); return RC;     }
+"//"                 { char c;  while((c=input() != '\n'));                    }
+"/*"                 { multiple_comment();}
 {int_all}            { yylval = make_node("INT",    yytext, 0); return INT;    }
 {float}              { yylval = make_node("FLOAT",  yytext, 0); return FLOAT;  }
 {char}               { yylval = make_node("CHAR",   yytext, 0); return CHAR;   }
 {id}                 { yylval = make_node("ID",     yytext, 0); return ID;     }
 {empty}              {                                                         }
 
-.|{wrong_id}|{wrong_int}|{wrong_char}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
+.|{wrong_int}|{wrong_char}|{wrong_float}|{wrong_id}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
 %%
+
+void multiple_comment() {
+    int c;
+    while (1) {
+        switch(input()) {
+            case 0:
+                fprintf(stderr, "Unclosed comment\n");
+                exit(-1);
+            case '*':
+                if ((c = input()) == '/') return;
+                unput(c);
+                break;
+        }
+    }
+}

@@ -39,10 +39,13 @@ ExtDef:
       Specifier ExtDecList SEMI           { $$ = make_node("ExtDef",          NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
    |  Specifier SEMI                      { $$ = make_node("ExtDef",          NULL, @$.first_line); insert(3, $$, $1, $2); }
    |  Specifier FunDec CompSt             { $$ = make_node("ExtDef",          NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
+   |  Specifier LERROR;
+   |  Specifier ExtDecList error          { flag = 0; printf("Error type B at Line %d: Missing close brace\n", @$.first_line); }
    ;
 ExtDecList:
       VarDec                              { $$ = make_node("ExtDecList",      NULL, @$.first_line); insert(2, $$, $1); }
    |  VarDec COMMA ExtDecList             { $$ = make_node("ExtDecList",      NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
+   |  VarDec error                        { flag = 0; printf("Error type B at Line %d: assign value at global range!\n", @$.first_line); }
    ;
 Specifier:
       TYPE                                { $$ = make_node("Specifier",       NULL, @$.first_line); insert(2, $$, $1);}
@@ -55,11 +58,19 @@ StructSpecifier:
 VarDec:
       ID                                  { $$ = make_node("VarDec",          NULL, @$.first_line); insert(2, $$, $1); }
    |  VarDec LB INT RB                    { $$ = make_node("VarDec",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
+   |  LERROR
    ;
 FunDec:
       ID LP VarList RP                    { $$ = make_node("FunDec",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
    |  ID LP RP                            { $$ = make_node("FunDec",          NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
+   |  ID LERROR VarList RP
+   |  ID LP VarList LERROR
+   |  ID LERROR RP
+   |  ID LP LERROR
+   |  LERROR LP VarList RP
+   |  LERROR LP RP
    |  ID LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
+   |  LERROR LP error                     { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
    ;
 VarList:
       ParamDec COMMA VarList              { $$ = make_node("VarList",         NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
@@ -83,7 +94,11 @@ Stmt:
    |  IF LP Exp RP Stmt ELSE Stmt         { $$ = make_node("Stmt",            NULL, @$.first_line); insert(8, $$, $1, $2, $3, $4, $5, $6, $7); }
    |  WHILE LP Exp RP Stmt                { $$ = make_node("Stmt",            NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
    |  RETURN LERROR SEMI 
+   |  WHILE LP LERROR RP Stmt
    |  RETURN error                        { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
+   |  IF LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
+   |  WHILE LP error                      { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
+   |  Exp error                           { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
    ;
 DefList:
       Def DefList                         { $$ = make_node("DefList",         NULL, @$.first_line); insert(3, $$, $1, $2); }
@@ -94,6 +109,7 @@ Def:
       Specifier DecList SEMI              { $$ = make_node("Def",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
    |  Specifier LERROR SEMI
    |  Specifier DecList error             { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
+   |  Specifier error                     { flag = 0; printf("Error type B at Line %d: Specifier error\n", @$.first_line); }
    ;
 DecList:
       Dec                                 { $$ = make_node("DecList",         NULL, @$.first_line); insert(2, $$, $1); }
