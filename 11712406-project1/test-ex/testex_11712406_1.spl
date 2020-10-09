@@ -1,0 +1,8 @@
+// this is a single line comment
+int main() {
+    /* multi line comment */
+    /*
+     * and this
+     */
+     int b;
+}
