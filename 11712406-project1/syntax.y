@@ -174,7 +174,7 @@ int main (int argc, char** argv) {
       perror(argv[1]);
       exit(-1);
    }
-   yydebug = 1;
+   yydebug = 0;
    yyparse();
    if (root && flag) 
       traverse_tree(root, 0);

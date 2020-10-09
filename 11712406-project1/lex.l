@@ -21,13 +21,12 @@ int_all              {int_dec}|{int_hex}
 float                -?{int}{frac}
 id                   [_a-zA-Z][_a-zA-Z0-9]*
 unic                 u[0-9a-fA-F]{4}
-esc                  \\([\"\\/bfnrt]|{unic})
-scp                  [^"\\\x00-\x1f]
-char                 '[[:print:]]'
+char                 '([[:print:]]|(\\[xX][0-9a-fA-F]{2}))'
 empty                [ \t\b\r\n]
    
 wrong_id             [0-9]+{id}
 wrong_int            (0[xX][0-9]*[g-zG-Z]+)|(0[0-9]+)
+wrong_char           '[[:print:]]*'
 
 %%
 
@@ -66,5 +65,5 @@ wrong_int            (0[xX][0-9]*[g-zG-Z]+)|(0[0-9]+)
 {id}                 { yylval = make_node("ID",     yytext, 0); return ID;     }
 {empty}              {                                                         }
 
-.|{wrong_id}|{wrong_int}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
+.|{wrong_id}|{wrong_int}|{wrong_char}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
 %%
