@@ -82,18 +82,18 @@ Stmt:
    |  IF LP Exp RP Stmt                   { $$ = make_node("Stmt",            NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
    |  IF LP Exp RP Stmt ELSE Stmt         { $$ = make_node("Stmt",            NULL, @$.first_line); insert(8, $$, $1, $2, $3, $4, $5, $6, $7); }
    |  WHILE LP Exp RP Stmt                { $$ = make_node("Stmt",            NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
-   |  RETURN error                        { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
    |  RETURN LERROR SEMI 
+   |  RETURN error                        { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
    ;
 DefList:
       Def DefList                         { $$ = make_node("DefList",         NULL, @$.first_line); insert(3, $$, $1, $2); }
    |  %empty                              { $$ = make_node("NULL",            NULL, @$.first_line); }
+   |  DefList error Def                   { flag = 0; printf("Error type B at Line %d: Missing specifier\n", @2.first_line); }
    ;
 Def:
       Specifier DecList SEMI              { $$ = make_node("Def",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
    |  Specifier LERROR SEMI
    |  Specifier DecList error             { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
-   |  error                               { flag = 0; printf("Error type B at Line %d: Missing specifier\n", @$.first_line + 1); }
    ;
 DecList:
       Dec                                 { $$ = make_node("DecList",         NULL, @$.first_line); insert(2, $$, $1); }
@@ -129,8 +129,9 @@ Exp:
    |  INT                                 { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
    |  FLOAT                               { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
    |  CHAR                                { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
-   |  ID LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
    |  Exp LERROR Exp
+   |  LERROR
+   |  ID LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
    ;
 Args:
       Exp COMMA Args                      { $$ = make_node("Args",            NULL, @$.first_line); insert(4, $$, $1, $2, $3); }

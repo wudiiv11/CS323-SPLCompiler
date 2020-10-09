@@ -16,7 +16,7 @@
 int                  0|[1-9][0-9]*
 frac                 \.[0-9]+
 int_dec              -?{int}
-int_hex              0[xX]{int}
+int_hex              0[xX]({int}|[a-fA-F]*)
 int_all              {int_dec}|{int_hex}
 float                -?{int}{frac}
 id                   [_a-zA-Z][_a-zA-Z0-9]*
@@ -25,9 +25,9 @@ esc                  \\([\"\\/bfnrt]|{unic})
 scp                  [^"\\\x00-\x1f]
 char                 '[[:print:]]'
 empty                [ \t\b\r\n]
-
+   
 wrong_id             [0-9]+{id}
-unsupported_oper     [&|]
+wrong_int            (0[xX][0-9]*[g-zG-Z]+)|(0[0-9]+)
 
 %%
 
@@ -66,5 +66,5 @@ unsupported_oper     [&|]
 {id}                 { yylval = make_node("ID",     yytext, 0); return ID;     }
 {empty}              {                                                         }
 
-.|{wrong_id}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
+.|{wrong_id}|{wrong_int}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
 %%
