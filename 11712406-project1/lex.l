@@ -27,6 +27,7 @@ char                 '[[:print:]]'
 empty                [ \t\b\r\n]
 
 wrong_id             [0-9]+{id}
+unsupported_oper     [&|]
 
 %%
 
