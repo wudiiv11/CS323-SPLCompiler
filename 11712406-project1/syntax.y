@@ -2,11 +2,12 @@
     #define YYSTYPE Node *
     #include "lex.yy.c"
     void yyerror (const char*);
+    extern int flag;
     Node* root;
     int null_cnt = 0;
 %}
 
-%token TYPE
+%token TYPE LERROR
 %token CHAR INT FLOAT
 %token ID
 %token STRUCT IF ELSE WHILE RETURN
@@ -46,33 +47,35 @@ ExtDecList:
 Specifier:
       TYPE                                { $$ = make_node("Specifier",       NULL, @$.first_line); insert(2, $$, $1);}
    |  StructSpecifier                     { $$ = make_node("Specifier",       NULL, @$.first_line); insert(2, $$, $1); }
+   |  LERROR
    ;
 StructSpecifier:
       STRUCT ID LC DefList RC             { $$ = make_node("StructSpecifier", NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
    |  STRUCT ID                           { $$ = make_node("StructSpecifier", NULL, @$.first_line); insert(3, $$, $1, $2); }
-      ;
+   ;
 VarDec:
       ID                                  { $$ = make_node("VarDec",          NULL, @$.first_line); insert(2, $$, $1); }
    |  VarDec LB INT RB                    { $$ = make_node("VarDec",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
-      ;
+   ;
 FunDec:
       ID LP VarList RP                    { $$ = make_node("FunDec",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
    |  ID LP RP                            { $$ = make_node("FunDec",          NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
-      ;
+   |  ID LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
+   ;
 VarList:
       ParamDec COMMA VarList              { $$ = make_node("VarList",         NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
    |  ParamDec                            { $$ = make_node("VarList",         NULL, @$.first_line); insert(2, $$, $1); }
-      ;
+   ;
 ParamDec:
       Specifier VarDec                    { $$ = make_node("ParamDec",        NULL, @$.first_line); insert(3, $$, $1, $2); }
-      ;
+   ;
 CompSt:
       LC DefList StmtList RC              { $$ = make_node("CompSt",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
-      ;
+   ;
 StmtList:
       Stmt StmtList                       { $$ = make_node("StmtList",        NULL, @$.first_line); insert(3, $$, $1, $2); }
    |  %empty                              { $$ = make_node("NULL",            NULL, @$.first_line); }
-      ;
+   ;
 Stmt:
       Exp SEMI                            { $$ = make_node("Stmt",            NULL, @$.first_line); insert(3, $$, $1, $2); }
    |  CompSt                              { $$ = make_node("Stmt",            NULL, @$.first_line); insert(2, $$, $1); }
@@ -80,6 +83,8 @@ Stmt:
    |  IF LP Exp RP Stmt                   { $$ = make_node("Stmt",            NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
    |  IF LP Exp RP Stmt ELSE Stmt         { $$ = make_node("Stmt",            NULL, @$.first_line); insert(8, $$, $1, $2, $3, $4, $5, $6, $7); }
    |  WHILE LP Exp RP Stmt                { $$ = make_node("Stmt",            NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
+   |  RETURN LERROR
+   |  RETURN Exp error                    { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
    ;
 DefList:
       Def DefList                         { $$ = make_node("DefList",         NULL, @$.first_line); insert(3, $$, $1, $2); }
@@ -87,6 +92,7 @@ DefList:
    ;
 Def:
       Specifier DecList SEMI              { $$ = make_node("Def",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
+      Specifier LERROR  SEMI
    ;
 DecList:
       Dec                                 { $$ = make_node("DecList",         NULL, @$.first_line); insert(2, $$, $1); }
@@ -95,6 +101,7 @@ DecList:
 Dec:
       VarDec                              { $$ = make_node("Dec",             NULL, @$.first_line); insert(2, $$, $1); }
    |  VarDec ASSIGN Exp                   { $$ = make_node("Dec",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
+   |  VarDec ASSIGN LERROR
    ;
 Exp: 
       Exp ASSIGN Exp                      { $$ = make_node("Exp",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
@@ -121,6 +128,7 @@ Exp:
    |  INT                                 { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
    |  FLOAT                               { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
    |  CHAR                                { $$ = make_node("Exp",             NULL, @$.first_line); insert(2, $$, $1); }
+   |  ID LP error                         { flag = 0; printf("Error type B at Line %d: Missing closing parenthesis ')'\n", @$.first_line); }
    ;
 Args:
       Exp COMMA Args                      { $$ = make_node("Args",            NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
@@ -165,7 +173,7 @@ int main (int argc, char** argv) {
    }
    yydebug = 0;
    yyparse();
-   if (root) 
+   if (root && flag) 
       traverse_tree(root, 0);
    return 0;
 }

@@ -2,6 +2,7 @@
     #include "project1_node.c"
     #include "syntax.tab.h"
     int yycolno = 1;
+    int flag = 1;
     #define YY_USER_ACTION \
         yylloc.first_line = yylineno; \
         yylloc.first_column = yycolno; \
@@ -24,6 +25,8 @@ esc                  \\([\"\\/bfnrt]|{unic})
 scp                  [^"\\\x00-\x1f]
 char                 '[[:print:]]'
 empty                [ \t\b\r\n]
+
+wrong_id             [0-9]+{id}
 
 %%
 
@@ -62,5 +65,5 @@ empty                [ \t\b\r\n]
 {id}                 { yylval = make_node("ID",     yytext, 0); return ID;     }
 {empty}              {                                                         }
 
-
+.|{wrong_id}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }
 %%
