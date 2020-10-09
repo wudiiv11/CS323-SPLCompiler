@@ -149,10 +149,19 @@ void print_node (Node* node, int num) {
    if (node->child_list_head->next) 
       printf(" (%d)", node->line_no);
    if (node->text) {
-      if (!strcmp(name, "CHAR"))
-         printf(": %c", node->text[1]);
-      else
-         printf(": %s", node->text);
+      printf(": ");
+      if (!strcmp(name, "CHAR")) {
+         int len = strlen(node->text);
+         for (int i = 1; i < len - 1; ++i) {
+            printf("%c", node->text[i]);
+         }
+      } else if (!strcmp(name, "INT")) {
+         printf("%d", (int)strtol(node->text, NULL, 0));
+      } else if (!strcmp(name, "FLOAT")) {
+         printf("%g", strtof(node->text, NULL));
+      } else {
+         printf("%s", node->text);
+      }
    }
    printf("\n");
 }
@@ -174,7 +183,7 @@ int main (int argc, char** argv) {
       perror(argv[1]);
       exit(-1);
    }
-   yydebug = 0;
+   yydebug = 1;
    yyparse();
    if (root && flag) 
       traverse_tree(root, 0);
