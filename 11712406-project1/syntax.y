@@ -54,6 +54,7 @@ Specifier:
 StructSpecifier:
       STRUCT ID LC DefList RC             { $$ = make_node("StructSpecifier", NULL, @$.first_line); insert(6, $$, $1, $2, $3, $4, $5); }
    |  STRUCT ID                           { $$ = make_node("StructSpecifier", NULL, @$.first_line); insert(3, $$, $1, $2); }
+   |  STRUCT ID LC error                  { flag = 0; printf("Error type B at Line %d: Missing closing brace '}'!\n", @$.first_line); }
    ;
 VarDec:
       ID                                  { $$ = make_node("VarDec",          NULL, @$.first_line); insert(2, $$, $1); }
@@ -81,6 +82,9 @@ ParamDec:
    ;
 CompSt:
       LC DefList StmtList RC              { $$ = make_node("CompSt",          NULL, @$.first_line); insert(5, $$, $1, $2, $3, $4); }
+   |  LC DefList StmtList error           { flag = 0; printf("Error type B at line %d: Missing closing brace '}'\n", @$.first_line); }      
+   |  LC DefList error                    { flag = 0; printf("Error type B at line %d: Missing closing brace '}'\n", @$.first_line); }
+   |  LC error                            { flag = 0; printf("Error type B at line %d: Missing closing brace '}'\n", @$.first_line); }
    ;
 StmtList:
       Stmt StmtList                       { $$ = make_node("StmtList",        NULL, @$.first_line); insert(3, $$, $1, $2); }

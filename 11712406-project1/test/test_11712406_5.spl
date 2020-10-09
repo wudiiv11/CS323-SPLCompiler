@@ -1,0 +1,23 @@
+struct a {
+    int a = 0x123FfA321;
+    char a = '\x0F';
+    float a;
+} a;
+
+int func(int val) {
+    val = val + t();
+    return (val / '2');
+}
+
+int main() 
+{
+    int a, b;
+    a = func(slist[func(0)].xx_id - 1) + 52 / a;
+    if (a) {  }
+    {
+        struct s2 {
+            int _val = 2;
+        } c;
+    }
+    return c;
+}

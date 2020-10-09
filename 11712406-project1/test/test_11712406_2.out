@@ -60,4 +60,77 @@ Program (1)
             RP
           CompSt (9)
             LC
+            DefList (10)
+              Def (10)
+                Specifier (10)
+                  TYPE: int
+                DecList (10)
+                  Dec (10)
+                    VarDec (10)
+                      ID: a
+                  COMMA
+                  DecList (10)
+                    Dec (10)
+                      VarDec (10)
+                        ID: b
+                      ASSIGN
+                      Exp (10)
+                        INT: 12
+                SEMI
+            StmtList (11)
+              Stmt (11)
+                Exp (11)
+                  Exp (11)
+                    ID: b
+                  ASSIGN
+                  Exp (11)
+                    INT: 268345635
+                SEMI
+              StmtList (12)
+                Stmt (12)
+                  IF
+                  LP
+                  Exp (12)
+                    Exp (12)
+                      ID: a
+                    GT
+                    Exp (12)
+                      ID: b
+                  RP
+                  Stmt (12)
+                    CompSt (12)
+                      LC
+                      StmtList (13)
+                        Stmt (13)
+                          Exp (13)
+                            Exp (13)
+                              ID: a
+                            ASSIGN
+                            Exp (13)
+                              Exp (13)
+                                ID: b
+                              PLUS
+                              Exp (13)
+                                INT: 1
+                          SEMI
+                      RC
+                  ELSE
+                  Stmt (14)
+                    CompSt (14)
+                      LC
+                      StmtList (15)
+                        Stmt (15)
+                          RETURN
+                          Exp (15)
+                            INT: 5
+                          SEMI
+                      RC
+                StmtList (17)
+                  Stmt (17)
+                    RETURN
+                    Exp (17)
+                      ID: main
+                      LP
+                      RP
+                    SEMI
             RC
