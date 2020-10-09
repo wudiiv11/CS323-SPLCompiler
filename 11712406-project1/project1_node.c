@@ -3,11 +3,11 @@
 #include <stdarg.h>
 
 typedef struct Node {
-    char*   name;
-    char*   text;
+    char*          name;
+    char*          text;
     struct Node*   child_list_head; /* dummy Head*/
     struct Node*   next;
-    int     line_no;
+    int            line_no;
 } Node;
 
 char* str_copy(const char* src) {

@@ -129,9 +129,7 @@ Args:
 
 %%
 
-void yyerror (const char* s) {
-   printf("syntax error!");
-}
+void yyerror (const char* s) {}
 
 void print_node (Node* node, int num) {
    while(num--) printf("  ");
@@ -167,6 +165,7 @@ int main (int argc, char** argv) {
    }
    yydebug = 0;
    yyparse();
-   traverse_tree(root, 0);
+   if (root) 
+      traverse_tree(root, 0);
    return 0;
 }
