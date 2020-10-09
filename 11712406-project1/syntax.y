@@ -92,6 +92,7 @@ DefList:
 Def:
       Specifier DecList SEMI              { $$ = make_node("Def",             NULL, @$.first_line); insert(4, $$, $1, $2, $3); }
    |  Specifier LERROR SEMI
+   |  Specifier DecList error             { flag = 0; printf("Error type B at Line %d: Missing semicolon ';'\n", @$.first_line); }
    ;
 DecList:
       Dec                                 { $$ = make_node("DecList",         NULL, @$.first_line); insert(2, $$, $1); }
