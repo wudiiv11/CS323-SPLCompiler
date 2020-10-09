@@ -1,2 +1,1 @@
-Error type B at Line 1: assign value at global range!
-Error type B at Line 1: Missing close brace
+Error type B at line 1: Missing closing brace '}' 
