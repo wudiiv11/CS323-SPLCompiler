@@ -171,6 +171,8 @@ int main (int argc, char** argv) {
    yyparse();
    if (!root || !flag) 
       return 0;
+   if (!root || !flag) 
+      return 0;
    /* root->pre_traverse(0); */
    SemanticAnalyser analyser;
    analyser.parse_semantic(root);

@@ -38,11 +38,9 @@ public:
 
 class Array {
 
-private:
+public:
     Type* base;
     int size;
-
-public:
     Array(Type* base, int size);
     bool operator== (const Array& arr) const;
 

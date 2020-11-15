@@ -218,11 +218,28 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
             }
             return new ExpItem(type, false);
         } else if (oper == "LB") {
-            
+            ExpItem* exp1 = parse_Exp(root->children[0]);
+            ExpItem* exp2 = parse_Exp(root->children[2]);
+            if (exp1->type && exp2->type) {
+                Item* item = table.look_up("people", Item::VARIABLE);
+                bool flag = true;
+                if (exp1->type->category != Type::ARRAY) {
+                    flag = false;
+                    semantic_error(10, root->children[0]->line_no, "indexing on non-array variable");
+                }  
+                if (!exp2->type->isTypeOf("int")) {
+                    flag = false;
+                    semantic_error(12, root->children[0]->line_no, "indexing by non-integer");
+                }
+                if (flag) {
+                    type = exp1->type->array->base;
+                }
+            }    
+            return new ExpItem(type, true);
         } else if (oper == "DOT") {
             ExpItem* exp = parse_Exp(root->children[0]);
             if (exp->type != NULL && exp->type->category == Type::STRUCTURE) {
-                Type* type = NULL;
+                type = NULL;
                 for (auto field: *(exp->type->fields)) {
                     if (field->name == root->children[2]->text) {
                         type = field->type;
@@ -233,7 +250,7 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
                     semantic_error(14, root->children[0]->line_no, "no such member: " + root->children[2]->text);
                 } 
             } else {
-                semantic_error(14, root->children[0]->line_no, "no such member: " + root->children[2]->text);
+                semantic_error(14, root->children[0]->line_no, "accessing with non-struct variable");
             }
             return new ExpItem(type, true);
         }
@@ -256,6 +273,7 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
         }
         return new ExpItem(type, false);
     } else if (stuff == "ID") {
+
         if (root->children.size() == 1) {
             Item* item = table.look_up(root->children[0]->text, Item::VARIABLE);
             if (item != NULL && item->category == item->VARIABLE) {
