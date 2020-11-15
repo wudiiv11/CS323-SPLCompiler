@@ -6,8 +6,8 @@
 using namespace std;
 
 Type::Type(string primitive) : category(PRIMITIVE), primitive(primitive) {}
-Type::Type(Array* array) : category(ARRAY), primitive(primitive) {}
-Type::Type(string name, vector<Field*>* fields) : category(STRUCTURE), fields(fields) {}
+Type::Type(Array* array) : category(ARRAY), array(array) {}
+Type::Type(string name, vector<Field*>* fields) : name(name), category(STRUCTURE), fields(fields) {}
 
 bool Type::operator== (const Type& t) const {
     if (category != t.category) return false;

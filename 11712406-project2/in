@@ -1,13 +1,18 @@
-struct Apple
+struct Person
 {
-  int weight;
-  float round;
+  int name;
+  int friends[10];
 };
-
-int test_2_r07()
+int test_2_r10()
 {
-  struct Apple aa;
-  float weight_test = 1.0;
-  aa.weight = aa + 2;
-  return 0;
+  struct Person tom;
+  struct Person people[10];
+  int i = 0;
+  while (i < 10)
+  {
+    people[i].name = i;
+    tom.friends[i] = i;
+    i = i + 1;
+  }
+  return tom.name[i-1];
 }

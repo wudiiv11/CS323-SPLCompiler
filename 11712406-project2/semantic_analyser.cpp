@@ -51,7 +51,7 @@ Type* SemanticAnalyser::parse_StructSpecifier(Node* root) {
         if (item == NULL) {
             semantic_error(14, root->children[1]->line_no, "access undefined structure");
         } else {
-            type = new Type(root->children[1]->text);
+            type = new Type(root->children[1]->text, item->type->fields);
         }
     } else if (root->children.size() == 5) {
         vector<Field*>* fields = new vector<Field*>();
@@ -124,7 +124,7 @@ void SemanticAnalyser::parse_Stmt(Node* root, Type* type) {
         parse_CompSt(node, type);
     } else if (node->name == "RETURN") {
         ExpItem* exp = parse_Exp(root->children[1]);
-        if (exp->type && !(*(exp->type) == *type)) {
+        if (exp && exp->type && !(*(exp->type) == *type)) {
             semantic_error(8, root->line_no, "incompatible return type");
         }
     } else if (node->name == "IF") {
@@ -220,22 +220,22 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
         } else if (oper == "LB") {
             
         } else if (oper == "DOT") {
-            ExpItem* exp = parse_Exp(root->children[2]);
+            ExpItem* exp = parse_Exp(root->children[0]);
             if (exp->type != NULL && exp->type->category == Type::STRUCTURE) {
                 Type* type = NULL;
                 for (auto field: *(exp->type->fields)) {
-                    if (field->name == root->children[2]->name) {
+                    if (field->name == root->children[2]->text) {
                         type = field->type;
                         break;
                     }
                 }
                 if (type == NULL) {
-                    semantic_error(14, root->children[0]->line_no, "no such member: " + root->children[2]->name);
-                }
+                    semantic_error(14, root->children[0]->line_no, "no such member: " + root->children[2]->text);
+                } 
             } else {
                 semantic_error(14, root->children[0]->line_no, "no such member: " + root->children[2]->text);
             }
-            return new ExpItem(type, false);
+            return new ExpItem(type, true);
         }
     } else if (stuff == "LP") {
         return parse_Exp(root->children[1]);

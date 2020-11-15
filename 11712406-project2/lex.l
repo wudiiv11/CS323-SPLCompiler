@@ -19,9 +19,8 @@
 
 int                  0|[1-9][0-9]*
 frac                 \.[0-9]+
-int_dec              -?{int}
 int_hex              0[xX]((0|[1-9][0-9]*)|([a-fA-F]))*
-int_all              {int_dec}|{int_hex}
+int_all              {int}|{int_hex}
 float                -?{int}{frac}
 id                   [_a-zA-Z][_a-zA-Z0-9]*
 char                 '([[:print:]]|(\\[xX][0-9a-fA-F]{2}))'
