@@ -34,13 +34,13 @@ wrong_float          0[0-9]+{frac}
 
 "struct"             { yylval = new Node("STRUCT");             return STRUCT; }
 "char"|"int"|"float" { yylval = new Node("TYPE", yytext);       return TYPE;   }
-"if"                 { yylval = new Node("IF");                 return IF;     }
-"else"               { yylval = new Node("ELSE");               return ELSE;   }
-"while"              { yylval = new Node("WHILE");              return WHILE;  }
+"if"                 { yylval = new Node("IF"    );             return IF;     }
+"else"               { yylval = new Node("ELSE"  );             return ELSE;   }
+"while"              { yylval = new Node("WHILE" );             return WHILE;  }
 "return"             { yylval = new Node("RETURN");             return RETURN; }
-"."                  { yylval = new Node("DOT");                return DOT;    }
-";"                  { yylval = new Node("SEMI");               return SEMI;   }
-","                  { yylval = new Node("COMMA");              return COMMA;  }
+"."                  { yylval = new Node("DOT"   );             return DOT;    }
+";"                  { yylval = new Node("SEMI"  );             return SEMI;   }
+","                  { yylval = new Node("COMMA" );             return COMMA;  }
 "="                  { yylval = new Node("ASSIGN");             return ASSIGN; }
 "<"                  { yylval = new Node("LT"    );             return LT;     }
 "<="                 { yylval = new Node("LE"    );             return LE;     }
@@ -61,12 +61,12 @@ wrong_float          0[0-9]+{frac}
 "]"                  { yylval = new Node("RB"    );             return RB;     }
 "{"                  { yylval = new Node("LC"    );             return LC;     }
 "}"                  { yylval = new Node("RC"    );             return RC;     }
-"//"                 { char c;  while((c=yyinput() != '\n'));                    }
+"//"                 { char c;  while((c=yyinput() != '\n'));                  }
 "/*"                 { multiple_comment();}
-{int_all}            { yylval = new Node("INT",    yytext);     return INT;    }
-{float}              { yylval = new Node("FLOAT",  yytext);     return FLOAT;  }
-{char}               { yylval = new Node("CHAR",   yytext);     return CHAR;   }
-{id}                 { yylval = new Node("ID",     yytext);     return ID;     }
+{int_all}            { yylval = new Node("INT",  yytext, yylineno);     return INT;    }
+{float}              { yylval = new Node("FLOAT",yytext, yylineno);     return FLOAT;  }
+{char}               { yylval = new Node("CHAR", yytext, yylineno);     return CHAR;   }
+{id}                 { yylval = new Node("ID",   yytext, yylineno);     return ID;     }
 {empty}              {                                                         }
 
 .|{wrong_int}|{wrong_char}|{wrong_float}|{wrong_id}              { flag = 0; printf("Error type A at Line %d: unknown lexeme %s\n", yylineno, yytext); return LERROR; }

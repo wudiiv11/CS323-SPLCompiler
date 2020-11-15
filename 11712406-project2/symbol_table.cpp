@@ -83,13 +83,8 @@ void SymbolTable::remove_item() {
 void SymbolTable::insert_struct(int line_no, string& name, vector<Field*>* fields) {
     auto e = table.find(name);
     if(e != table.end()) {
-        Entry* entry = e->second;
-        for (Item* item: *(entry->items)) {
-            if (item->category == Item::STRUCTURE && item->scope_depth == scope_depth) {
-                semantic_error(15, line_no, "redefine struct: " + name);
-                return;
-            }
-        }
+        semantic_error(15, line_no, "redefine struct: " + name);
+        return;
     }
     Type* type = new Type(name, fields);
     Item* item = new Item(type, scope_depth);
@@ -103,13 +98,8 @@ void SymbolTable::remove_struct() {
 void SymbolTable::insert_var(int line_no, string& name, Type* type) {
     auto e = table.find(name);
     if (e != table.end()) {
-        Entry* entry = e->second;
-        for (Item* item: *(entry->items)) {
-            if (item->category == Item::VARIABLE && item->scope_depth == scope_depth) {
-                semantic_error(3, line_no, "redefine variable: " + name);
-                return;
-            }
-        }
+        semantic_error(3, line_no, "redefine variable: " + name);
+        return;
     }
     Item* item = new Item(type, scope_depth);
     insert_item(name, item);
@@ -118,13 +108,8 @@ void SymbolTable::insert_var(int line_no, string& name, Type* type) {
 void SymbolTable::insert_func(int line_no, string& name, Type* ret, vector<Type*>* args) {
     auto e = table.find(name);
     if (e != table.end()) {
-        Entry* entry = e->second;
-        for (Item* item: *(entry->items)) {
-            if (item->category == Item::FUNCITON) {
-                semantic_error(4, line_no, "redefine function: " + name);
-                return;
-            }
-        } 
+        semantic_error(4, line_no, "redefine function: " + name);
+        return;
     }
     Item* item = new Item(ret, args, scope_depth);
     insert_item(name, item);
