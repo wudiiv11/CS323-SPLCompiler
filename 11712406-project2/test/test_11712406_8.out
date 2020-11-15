@@ -1,0 +1,4 @@
+Error type 5 at Line 10: unmatching type on both sides of assignment
+Error type 5 at Line 11: unmatching type on both sides of assignment
+Error type 1 at Line 12: undefined varaible: c
+Error type 9 at Line 12: function's args mismatch the declared para

@@ -1,0 +1,3 @@
+Error type 6 at Line 14: left side in assignment is rvalue
+Error type 10 at Line 16: indexing on non-array variable
+Error type 5 at Line 16: unmatching type on both sides of assignment

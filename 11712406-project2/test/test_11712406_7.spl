@@ -1,0 +1,11 @@
+int main() {
+    int age[3];
+    int abc[3];
+    age[3] = 5;
+    if (age > abc) {
+        int b = 3;
+    } else {
+        int c = 5;
+    }
+    return abc[2] + age[1];
+}

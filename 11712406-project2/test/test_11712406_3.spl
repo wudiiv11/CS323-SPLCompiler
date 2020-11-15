@@ -1,0 +1,12 @@
+int fibo(int n) {
+    if (n < 2) {
+        return n;
+    }
+    return fibo(n-1) + fibo(n-2);
+}
+
+int main() {
+    int c = 100;
+    int x = fibo(5) + fibo(25);
+    return c.num + fibo(c + x);
+}

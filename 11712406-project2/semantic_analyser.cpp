@@ -124,7 +124,7 @@ void SemanticAnalyser::parse_Stmt(Node* root, Type* type) {
         parse_CompSt(node, type);
     } else if (node->name == "RETURN") {
         ExpItem* exp = parse_Exp(root->children[1]);
-        if (exp && exp->type && !(*(exp->type) == *type)) {
+        if (!exp->type || !(*(exp->type) == *type)) {
             semantic_error(8, root->line_no, "incompatible return type");
         }
     } else if (node->name == "IF") {
@@ -160,7 +160,10 @@ void SemanticAnalyser::parse_Dec(Node* root, Type* type, vector<Field*>* fields)
     Field* field = parse_VarDec(root->children[0], type);
     fields->push_back(field);
     if (root->children.size() > 2) {
-        parse_Exp(root->children[2]);
+        ExpItem* item = parse_Exp(root->children[2]);
+        if (!item->type || !(*(field->type) == *(item->type))) {
+            semantic_error(5, root->children[0]->line_no, "unmatching type on both sides of assignment");
+        }
     }
 }
 
@@ -175,7 +178,7 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
             if (!exp1->isLeftValue) {
                 semantic_error(6, root->children[0]->line_no, "left side in assignment is rvalue");
             }
-            if (exp1->type && exp2->type && *(exp1->type) == *(exp2->type) || !exp1->type && !exp2->type) {
+            if (!exp1->type && !exp2->type || exp1->type && exp2->type && *(exp1->type) == *(exp2->type)) {
                 type = exp1->type;
             } else {
                 semantic_error(5, root->children[0]->line_no, "unmatching type on both sides of assignment");
@@ -190,16 +193,7 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
                 semantic_error(7, root->children[0]->line_no, "boolean operation on non-int variables");
             }
             return new ExpItem(type, false);
-        } else if (oper == "LT" || oper == "LE" || oper == "GT" || oper == "GE" || oper == "NE" || oper == "EQ") {
-            ExpItem* exp1 = parse_Exp(root->children[0]);
-            ExpItem* exp2 = parse_Exp(root->children[2]);
-            if (*(exp1->type) == *(exp2->type)) {
-                type = exp1->type;
-            } else {
-                semantic_error(7, root->children[0]->line_no, "binary operation on non-number variables");
-            }
-            return new ExpItem(type, false);
-        } else if (oper == "PLUS" || oper == "MINUS" || oper == "MUL" || oper == "DIV") {
+        } else if (oper == "LT" || oper == "LE" || oper == "GT" || oper == "GE" || oper == "NE" || oper == "EQ" || oper == "PLUS" || oper == "MINUS" || oper == "MUL" || oper == "DIV") {
             ExpItem* exp1 = parse_Exp(root->children[0]);
             ExpItem* exp2 = parse_Exp(root->children[2]);
             Type* type = NULL;
@@ -214,8 +208,10 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
                     }
                 } else if (exp1->type->isTypeOf("int") || exp1->type->isTypeOf("float")) {
                     type = exp1->type;
+                } else {
+                    semantic_error(7, root->children[0]->line_no, "binary operation on non-number variables");
                 }
-            }
+            } 
             return new ExpItem(type, false);
         } else if (oper == "LB") {
             ExpItem* exp1 = parse_Exp(root->children[0]);
@@ -273,7 +269,6 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
         }
         return new ExpItem(type, false);
     } else if (stuff == "ID") {
-
         if (root->children.size() == 1) {
             Item* item = table.look_up(root->children[0]->text, Item::VARIABLE);
             if (item != NULL && item->category == item->VARIABLE) {
@@ -290,20 +285,20 @@ ExpItem* SemanticAnalyser::parse_Exp(Node* root) {
             Item* item = table.look_up(node->text, Item::FUNCITON);
             if (item == NULL) {
                 semantic_error(2, node->line_no, "undefined function: " + node->text);
-                return NULL;
+                return new ExpItem(NULL, false);
             }
             if (item->category != Item::FUNCITON) {
                 semantic_error(11, node->line_no, "invoking non-function variable: " + node->text);
-                return NULL;
+                return new ExpItem(NULL, false);
             }
             if (item->args->size() != args->size()) {
                 semantic_error(9, node->line_no, "invalid argument number for compare, expect " + to_string(item->args->size()) + ", get " + to_string(args->size()));
-                return NULL;
+                return new ExpItem(NULL, false);
             }
             for (int i = 0; i < args->size(); ++i) {
                 Type* a = item->args->at(i);
                 Type* b = args->at(i)->type;
-                if(!(*a == *b)) {
+                if(!a || !b || !(*a == *b)) {
                     semantic_error(9, node->line_no, "function's args mismatch the declared para");
                     break;
                 }
