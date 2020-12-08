@@ -1,7 +1,7 @@
 %{
     #define YYSTYPE Node *
     #include "lex.yy.c"
-    #include "semantic_analyser.h"
+    #include "parser.h"
     void yyerror (const char*);
     extern int flag;
     Node* root;
@@ -171,8 +171,8 @@ int main (int argc, char** argv) {
    yyparse();
    if (!root || !flag) 
       return 0;
-   /* root->pre_traverse(0); */
-   SemanticAnalyser analyser;
-   analyser.parse_semantic(root);
+   root->pre_traverse(0); 
+   Parser parser;
+   parser.parse_tree(root);
    return 0;
 }
