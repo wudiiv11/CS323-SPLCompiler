@@ -56,6 +56,8 @@ Item::Item(Type* type, int depth) : type(type), scope_depth(depth) {
     category = Item::VARIABLE;
 }
 
+
+
 Entry::Entry(string& name) : name(name) {
     items = new list<Item*>();
 }
@@ -93,6 +95,7 @@ void SymbolTable::insert_struct(int line_no, string& name, vector<Field*>* field
     }
     Type* type = new Type(name, fields);
     Item* item = new Item(type, scope_depth);
+    item->category = Item::STRUCTURE;
     insert_item(name, item);
 }
 
@@ -112,6 +115,7 @@ void SymbolTable::insert_var(int line_no, string& name, Type* type) {
         }
     }
     Item* item = new Item(type, scope_depth);
+    item->category = Item::VARIABLE;
     insert_item(name, item);
 }
 
@@ -127,6 +131,7 @@ void SymbolTable::insert_func(int line_no, string& name, Type* ret, vector<Type*
         } 
     }
     Item* item = new Item(ret, args, scope_depth);
+    item->category = Item::FUNCITON;
     insert_item(name, item);
 }
 
