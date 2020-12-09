@@ -1,7 +1,8 @@
 %{
     #define YYSTYPE Node *
     #include "lex.yy.c"
-    #include "parser.h"
+    #include "./include/node.h"
+    #include "./include/translator.h"
     void yyerror (const char*);
     extern int flag;
     Node* root;
@@ -172,7 +173,9 @@ int main (int argc, char** argv) {
    if (!root || !flag) 
       return 0;
    root->pre_traverse(0); 
-   Parser parser;
-   parser.parse_tree(root);
+   /* Parser parser; */
+   /* parser.parse_tree(root); */
+   Translator trans;
+   trans.translate_tree(root);
    return 0;
 }

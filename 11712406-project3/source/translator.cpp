@@ -1,9 +1,11 @@
 #include "../include/translator.h"
 
+#include <iostream>
+
 int Translator::place_cnt = 0;
 int Translator::label_cnt = 0;
 
-Translator::Translator() { codes; }
+Translator::Translator() { codes; store; }
 
 Record::Record(CATEGORY c, vector<string> args) {
     this->category = c;
@@ -61,6 +63,8 @@ string Record::to_string() {
         return "LABEL " + args[0];
     case R_RETURN:
         return "RETURN " + args[0];
+    case R_FUNCTION:
+        return "FUNCTION " + args[0] + " :";
     default:
         break;
     }
@@ -68,12 +72,12 @@ string Record::to_string() {
 
 
 string Translator::new_place() {
-    return string("_v" + to_string(place_cnt++));
+    return string("t" + to_string(place_cnt++));
 }
 
 
 string Translator::new_label() {
-    return string("_lb" + to_string(label_cnt++));
+    return string("label" + to_string(label_cnt++));
 }
 
 
@@ -83,6 +87,9 @@ Expr::Expr(string id) : id(id) {}
 
 void Translator::translate_tree(Node* n) {
     translate_Program(n);
+    for (auto i : codes)
+        cout << i.to_string() << endl;
+    cout << (store.lookup("main") == nullptr) << endl;
 }
 
 
@@ -100,11 +107,12 @@ void Translator::translate_ExtDefList(Node* n) {
 
 
 void Translator::translate_ExtDef(Node* n) {
-    translate_Specifier(n->children[0]);
+    Type* t = translate_Specifier(n->children[0]);
     if (n->children[1]->name == "ExtDecList")
         translate_ExtDecList(n->children[1]);
     if (n->children[1]->name == "FunDec") {
-        translate_FunDec(n->children[1]);
+        Function* f = translate_FunDec(n->children[1], t);
+        codes.push_back(Record(Record::R_FUNCTION, 1, f->name));
         translate_CompSt(n->children[2]);
     }
 }
@@ -117,14 +125,30 @@ void Translator::translate_ExtDecList(Node* n) {
 }
 
 
-void Translator::translate_Specifier(Node* n) {
-    // nothing to translate
+Type* Translator::translate_Specifier(Node* n) {
+    Type* t = new Type();
+    Node* child = n->children[0];
+    if (n->name == "TYPE") {
+        t->primitive = child->text;
+        t->category = Type::T_PRIMITIVE;
+    } else if (n->name == "StructSpecifier") {
+        t->structure = translate_StructSpecifier(child);
+        t->category = Type::T_STRUCTURE;
+    }
+    return t;
 }
 
 
-void Translator::translate_StructSpecifier(Node* n) {
-    // todo
-    // 这里应该返回一个结构体的信息
+Struct* Translator::translate_StructSpecifier(Node* n) {
+    store.add_scope();
+    if (n->children.size() == 2) {
+        store.insert_struct(n->children[1]->text, new vector<Field*>());
+    } else if (n->children.size() == 5) {
+        vector<Field*>* fields = new vector<Field*>();
+        translate_DefList(n->children[3], fields);
+        store.insert_struct(n->children[1]->text, fields);
+    }
+    store.sub_scope();
 }
 
 
@@ -133,13 +157,20 @@ void Translator::translate_VarDec(Node* n) {
 }
 
 
-void Translator::translate_FunDec(Node* n) {
-    // todo
+Function* Translator::translate_FunDec(Node* n, Type* t) {
+    Function* f = new Function();
+    f->name = n->children[0]->text;
+    f->ret = t;
+    vector<Field*>* args = new vector<Field*>();
+    if (n->children.size() > 3) 
+        translate_VarList(n->children[3], args);
+    f->args = args;
+    return f;
 }
 
 
-void Translator::translate_VarList(Node* n) {
-    // todo
+void Translator::translate_VarList(Node* n, vector<Field*>* fields) {
+
 }
 
 
@@ -150,18 +181,29 @@ void Translator::translate_ParamDec(Node* n) {
 
 
 void Translator::translate_CompSt(Node* n) {
-    translate_DefList(n->children[1]);
+    store.add_scope();
+
+    translate_DefList(n->children[1], new vector<Field*>());
     translate_StmtList(n->children[2]);
+
+    store.sub_scope();
 }
 
 
 void Translator::translate_StmtList(Node* n) {
-    if (n->children.empty())
-        return;
+    if (n->children.size() > 0)
+        translate_Stmt(n->children[0]);
+    if (n->children.size() > 1)
+        translate_StmtList(n->children[1]);
+}
+
+
+void Translator::translate_Stmt(Node* n) {
     string s = n->children[0]->name;
     if (s == "Exp") {
         // 不应该出现这种情况
-        translate_Exp(n->children[0], "null");
+        string tp = new_place();
+        translate_Exp(n->children[0], tp);
     } else if (s == "CompSt") {
         translate_CompSt(n->children[0]);
     } else if (s == "RETURN") {
@@ -180,17 +222,47 @@ void Translator::translate_StmtList(Node* n) {
             translate_Stmt(n->children[6]);
             codes.push_back(Record(Record::R_LABEL, 1, lb_3));
         }
-    } else if (s == "WHILE") {
-        string lb_1 = new_label();
-        string lb_2 = new_label();
-        string lb_3 = new_label();
-        codes.push_back(Record(Record::R_LABEL, 1, lb_1));
-        translate_cond_Exp(n->children[2], lb_2, lb_3);
-        codes.push_back(Record(Record::R_LABEL, 1, lb_2));
-        translate_Stmt(n->children[4]);
-        codes.push_back(Record(Record::R_GOTO, 1, lb_1));
-        codes.push_back(Record(Record::R_LABEL, 1, lb_3));
+    // } else if (s == "WHILE") {
+    //     string lb_1 = new_label();
+    //     string lb_2 = new_label();
+    //     string lb_3 = new_label();
+    //     codes.push_back(Record(Record::R_LABEL, 1, lb_1));
+    //     translate_cond_Exp(n->children[2], lb_2, lb_3);
+    //     codes.push_back(Record(Record::R_LABEL, 1, lb_2));
+    //     translate_Stmt(n->children[4]);
+    //     codes.push_back(Record(Record::R_GOTO, 1, lb_1));
+    //     codes.push_back(Record(Record::R_LABEL, 1, lb_3));
     }
+}
+
+
+void Translator::translate_Dec(Node* n) {
+    translate_VarDec(n->children[0]);
+    if (n->children.size() > 1) {
+        string tp = new_place();
+        translate_Exp(n->children[2], tp);
+    }
+}
+
+
+void Translator::translate_Def(Node* n) {
+    translate_Specifier(n->children[0]);
+    translate_DecList(n->children[1]);
+}
+
+
+void Translator::translate_DecList(Node* n) {
+    translate_Dec(n->children[0]);
+    if (n->children.size() > 1)
+        translate_DecList(n->children[2]);
+}
+
+
+void Translator::translate_DefList(Node* n, vector<Field*>* fields) {
+    if (n->children[0]->name == "Def")
+        translate_Def(n->children[0]);
+    if (n->children.size() > 1)
+        translate_DefList(n->children[1], fields);
 }
 
 
@@ -211,20 +283,20 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
             string lb_2 = new_label();
-            codes.push_back(Record(Record::R_ASSIGN, 1, "#0"));
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, string("#0")));
             translate_cond_Exp(n, lb_1, lb_2);
             codes.push_back(Record(Record::R_LABEL, 1, lb_1));
-            codes.push_back(Record(Record::R_ASSIGN, 1, "#1"));
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, string("#1")));
             codes.push_back(Record(Record::R_LABEL, 1, lb_2));
         } else if (arg2 == "PLUS" || arg2 == "MINUS" || arg2 == "MUL" || arg2 == "DIV") {
             string tp1 = new_place();
             string tp2 = new_place();
             translate_Exp(n->children[0], tp1);
             translate_Exp(n->children[2], tp2);
-            if (arg2 == "PLUS") codes.push_back(Record(Record::R_PLUS, 2, tp1, tp2));
-            else if (arg2 == "MINUS") codes.push_back(Record(Record::R_MINUS, 2, tp1, tp2));
-            else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 2, tp1, tp2));
-            else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 2, tp1, tp2));
+            if (arg2 == "PLUS") codes.push_back(Record(Record::R_PLUS, 3, place, tp1, tp2));
+            else if (arg2 == "MINUS") codes.push_back(Record(Record::R_MINUS, 3, place, tp1, tp2));
+            else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
+            else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
         }
     } else if (arg1 == "LP") {
         
@@ -241,10 +313,14 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         codes.push_back(Record(Record::R_ASSIGN, 1, "#1"));
         codes.push_back(Record(Record::R_LABEL, 1, lb_2));
     } else if (arg1 == "ID") {
-        codes.push_back(Record(Record::R_ASSIGN, 1, n->children[0]->text));
-        expr->id = n->children[0]->text;
+        if (n->children.size() == 1) {
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, n->children[0]->text));
+            expr->id = n->children[0]->text;
+        } else {
+            
+        }
     } else if (arg1 == "INT") {
-        codes.push_back(Record(Record::R_INT, 1, n->children[0]->text));
+        codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
     }
 
     return expr;

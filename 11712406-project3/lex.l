@@ -1,6 +1,5 @@
 %{
-    #include "node.h"
-    #include "symbol_table.h"
+    #include "./include/node.h"
     #include "syntax.tab.h"
     #define YY_USER_ACTION \
         yylloc.first_line = yylineno; \
