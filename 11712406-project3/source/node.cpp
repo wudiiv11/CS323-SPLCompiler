@@ -1,8 +1,6 @@
-#include "node.h"
+#include "../include/node.h"
 #include <string>
 #include <cstdarg>
-
-using namespace std;
 
 Node::Node() : Node("", "", 0) {}
 Node::Node(const string& name) : Node(name, "", 0) {}

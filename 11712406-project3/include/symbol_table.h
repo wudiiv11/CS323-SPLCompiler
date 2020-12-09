@@ -18,43 +18,6 @@ class Type;
 class Field;
 class Entry;
 
-class Type {
-
-public:
-    string name;
-    enum {PRIMITIVE, ARRAY, STRUCTURE} category;
-    union {
-        string primitive;
-        Array *array;
-        vector<Field*>* fields;
-    };
-
-    Type(string primitive);
-    Type(Array* array);
-    Type(string name, vector<Field*>* fields);
-    bool operator== (const Type& t) const;
-    bool isTypeOf(const string& name) const;
-};
-
-class Array {
-
-public:
-    Type* base;
-    int size;
-    Array(Type* base, int size);
-    bool operator== (const Array& arr) const;
-
-};
-
-class Field {
-
-public:
-    string name;
-    Type* type;
-
-    Field(string name, Type* type) : name(name), type(type) {}
-};
-
 class Item{
 public:
     int scope_depth;

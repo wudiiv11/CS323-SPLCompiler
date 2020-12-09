@@ -37,12 +37,4 @@ public:
     void       parse_Args            (Node*, vector<ExpItem*>*);
 };
 
-class ExpItem {
-private:
-public:
-    Type* type;
-    bool isLeftValue;
-    ExpItem(Type* type, bool isLeftValue);
-};
-
 #endif
