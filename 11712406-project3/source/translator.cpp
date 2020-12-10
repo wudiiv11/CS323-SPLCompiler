@@ -254,31 +254,24 @@ void Translator::translate_Stmt(Node* n) {
         translate_Exp(n->children[1], tp);
         codes.push_back(Record(Record::R_RETURN, 1, tp));
     } else if (s == "IF") {
-        string lb_1 = new_label();
-        string lb_2 = new_label();
-        string lb_3 = new_label();
         if (n->children.size() > 5) {
+            string lb_1 = new_label();
+            string lb_2 = new_label();
+            string lb_3 = new_label();
             translate_cond_Exp(n->children[2], lb_1, lb_2);
             codes.push_back(Record(Record::R_LABEL, 1, lb_1));
             translate_Stmt(n->children[4]);
-            codes.push_back(Record(Record::R_LABEL, 1, lb_3));
+            codes.push_back(Record(Record::R_GOTO, 1, lb_3));
             codes.push_back(Record(Record::R_LABEL, 1, lb_2));
             translate_Stmt(n->children[6]);
             codes.push_back(Record(Record::R_LABEL, 1, lb_3));
         } else {
+            string lb_1 = new_label();
+            string lb_2 = new_label();
             translate_cond_Exp(n->children[2], lb_1, lb_2);
             codes.push_back(Record(Record::R_LABEL, 1, lb_1));
             translate_Stmt(n->children[4]);
             codes.push_back(Record(Record::R_LABEL, 1, lb_2));
-        }
-
-        translate_cond_Exp(n->children[2], lb_1, lb_2);
-        codes.push_back(Record(Record::R_LABEL, 1, lb_1));
-        translate_Stmt(n->children[4]);
-        codes.push_back(Record(Record::R_LABEL, 1, lb_2));
-        if (n->children.size() > 5) {
-            translate_Stmt(n->children[6]);
-            codes.push_back(Record(Record::R_LABEL, 1, lb_3));
         }
     } else if (s == "WHILE") {
         string lb_1 = new_label();
