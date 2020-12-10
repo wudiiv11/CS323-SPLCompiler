@@ -18,7 +18,7 @@ public:
         R_PLUS, R_MINUS, R_MUL, R_DIV,
         R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
         R_WHILE, R_AND, R_OR,
-        R_GOTO, R_LABEL, R_RETURN,
+        R_GOTO, R_LABEL, R_RETURN, R_CALL, R_READ, R_WRITE
     } category;
     vector<string> args;
     Record(CATEGORY c, vector<string> args);

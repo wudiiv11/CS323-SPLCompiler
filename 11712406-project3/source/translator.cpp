@@ -67,6 +67,11 @@ string Record::to_string() {
         return "FUNCTION " + args[0] + " :";
     case R_PARAM:
         return "PARAM " + args[0];
+    case R_READ:
+        return "READ " + args[0];
+    case R_WRITE:
+        return "WRITE " + args[0];
+    case R_CALL:
     default:
         return "error";
     }
@@ -98,7 +103,8 @@ void Translator::init_read_func() {
     f->ret = new Type("int");
     f->name = "read";
 
-    store.insert("read", "none", new Type(f));
+    store.insert("read", "READ", new Type(f));
+    Item* item = store.lookup("read");
 }
 
 
@@ -108,6 +114,8 @@ void Translator::init_write_func() {
     f->args->push_back(new Field("arg", new Type("int")));
     f->ret = new Type("int");
     f->name = "write";
+
+    store.insert("write", "WRITE", new Type(f));
 }
 
 
@@ -118,6 +126,8 @@ void Translator::init_sys_call() {
 
 
 void Translator::translate_tree(Node* n) {
+    init_sys_call();
+
     translate_Program(n);
     for (auto i : codes)
         cout << i.to_string() << endl;
@@ -220,7 +230,7 @@ Function* Translator::translate_FunDec(Node* n, Type* t) {
 
 void Translator::translate_VarList(Node* n, vector<Field*>* fields) {
     Field* f = translate_ParamDec(n->children[0]);
-    // fields->push_back(f);
+    fields->push_back(f);
 }
 
 
@@ -252,7 +262,6 @@ void Translator::translate_StmtList(Node* n) {
 void Translator::translate_Stmt(Node* n) {
     string s = n->children[0]->name;
     if (s == "Exp") {
-        // 不应该出现这种情况
         string tp = new_place();
         translate_Exp(n->children[0], tp);
     } else if (s == "CompSt") {
@@ -321,6 +330,8 @@ Expr* Translator::translate_Exp(Node* n, string place) {
     Expr* expr = new Expr();
     // todo 考虑 read / write
 
+    // cout << n->children[0]->name << endl;
+
     string arg1 = n->children[0]->name;
     if (arg1 == "Exp") {
         string arg2 = n->children[1]->name;
@@ -355,7 +366,7 @@ Expr* Translator::translate_Exp(Node* n, string place) {
     } else if (arg1 == "MINUS") {
         string tp = new_place();
         translate_Exp(n->children[1], tp);
-        codes.push_back(Record(Record::R_MINUS, 3, place, "#0", tp));
+        codes.push_back(Record(Record::R_MINUS, 3, place, string("#0"), tp));
     } else if (arg1 == "NOT") {
         string lb_1 = new_label();
         string lb_2 = new_label();
@@ -368,8 +379,17 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         if (n->children.size() == 1) {
             codes.push_back(Record(Record::R_ASSIGN, 2, place, n->children[0]->text));
             expr->id = n->children[0]->text;
+        } else if (n->children[0]->text == "read") {
+            codes.push_back(Record(Record::R_READ, 1, place));
+        } else if (n->children[0]->text == "write") {
+            string tp = new_place();
+            translate_Exp(n->children[2]->children[0], tp);
+            codes.push_back(Record(Record::R_WRITE, 1, place));
+        } else if (n->children[2]->name == "Args") {
+        
         } else {
-            
+            // Item* item = store.lookup(n->children[0]->text);
+            // codes.push_back(Record(Record::R_CALL, 2, item->alias, place));
         }
     } else if (arg1 == "INT") {
         codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
