@@ -377,7 +377,9 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         codes.push_back(Record(Record::R_LABEL, 1, lb_2));
     } else if (arg1 == "ID") {
         if (n->children.size() == 1) {
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, n->children[0]->text));
+            string var = n->children[0]->text;
+            Item* item = store.lookup(var);
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
             expr->id = n->children[0]->text;
         } else if (n->children[0]->text == "read") {
             codes.push_back(Record(Record::R_READ, 1, place));
