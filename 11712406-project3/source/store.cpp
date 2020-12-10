@@ -3,10 +3,7 @@
 Item::Item() {}
 
 
-Store::Store() { 
-    scope;
-    table; 
-}
+Store::Store() {}
 
 
 Item* Store::lookup(string str) {

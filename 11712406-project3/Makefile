@@ -1,11 +1,11 @@
-CXX=g++
+CXX=g++-10
 FLEX=flex
 BISON=bison
 
 
 target=bin/splc
 src=source/node.cpp source/translator.cpp source/store.cpp syntax.tab.c
-cflags=-lfl -ly
+cflags=-std=c++11 -lfl -ly
 
 .lex: lex.l
 	$(FLEX) lex.l

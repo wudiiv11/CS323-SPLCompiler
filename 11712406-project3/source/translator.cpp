@@ -5,7 +5,7 @@
 int Translator::place_cnt = 0;
 int Translator::label_cnt = 0;
 
-Translator::Translator() { codes; store; }
+Translator::Translator() {}
 
 Record::Record(CATEGORY c, vector<string> args) {
     this->category = c;
@@ -16,7 +16,6 @@ Record::Record(CATEGORY c, vector<string> args) {
 Record::Record(CATEGORY c, int num, ...) {
     this->category = c;
 
-    args;
     va_list list;
     va_start(list, num);
 
@@ -66,7 +65,7 @@ string Record::to_string() {
     case R_FUNCTION:
         return "FUNCTION " + args[0] + " :";
     default:
-        break;
+        return "error";
     }
 }
 

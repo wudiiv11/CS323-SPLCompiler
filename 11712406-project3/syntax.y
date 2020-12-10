@@ -34,7 +34,7 @@ Program:
    ;
 ExtDefList:
       ExtDef ExtDefList                   { $$ = new Node("ExtDefList", "", @$.first_line);      $$->insert(2, $1, $2);}
-   |  %empty                              { $$ = new Node();}
+   |  /* empty */                         { $$ = new Node(); }
    ;
 ExtDef:
       Specifier ExtDecList SEMI           { $$ = new Node("ExtDef", "", @$.first_line);          $$->insert(3, $1, $2, $3);}
@@ -86,7 +86,7 @@ CompSt:
    ;
 StmtList:
       Stmt StmtList                       { $$ = new Node("StmtList", "", @$.first_line);        $$->insert(2, $1, $2); }
-   |  %empty                              { $$ = new Node("", "", @$.first_line); }
+   |  /* empty*/                          { $$ = new Node("", "", @$.first_line); }
    ;
 Stmt:
       Exp SEMI                            { $$ = new Node("Stmt", "", @$.first_line);            $$->insert(2, $1, $2); }
@@ -104,7 +104,7 @@ Stmt:
    ;
 DefList:
       Def DefList                         { $$ = new Node("DefList", "", @$.first_line);         $$->insert(2, $1, $2); }
-   |  %empty                              { $$ = new Node("", "", @$.first_line); }
+   |  /* empty */                         { $$ = new Node("", "", @$.first_line); }
    |  DefList error Def                   { flag = 0; printf("Error type B at Line %d: Missing specifier\n", @2.first_line); }
    ;
 Def:
