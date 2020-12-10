@@ -3,14 +3,23 @@
 Item::Item() {}
 
 
-Store::Store() {}
+Store::Store() {
+    scope.push_back(vector<string>());
+}
+
+
+Item* Store::lookup(string str) {
+    if (table.find(str) == table.end() || table[str].empty())
+        return nullptr;
+    return table[str].front();
+}
 
 
 Item* Store::lookup(string str, Type::CATEGORY c) {
     if (table.find(str) == table.end() || table[str].empty())
         return nullptr;
     for (auto i : table[str])
-        if (i->category == c)
+        if (i->t->category == c)
             return i;
     return nullptr;
 }
@@ -25,9 +34,10 @@ void Store::ensure_table_entry(string name) {
 void Store::insert(string name, string alias, Type* type) {
     ensure_table_entry(name);
     Item* item = new Item();
-    
-    // table[name].push_front(item);
-    // scope.back().push_back(name);
+    item->alias = alias;
+    item->t = type;
+    table[name].push_front(item);
+    scope.back().push_back(name);
 }
 
 

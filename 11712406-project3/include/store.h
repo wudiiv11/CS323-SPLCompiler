@@ -31,6 +31,7 @@ public:
     unordered_map<string, list<Item*>> table;
     
     Store();
+    Item* lookup(string);
     Item* lookup(string, Type::CATEGORY c);
     void insert(string, string alias, Type* type);
     void add_scope();

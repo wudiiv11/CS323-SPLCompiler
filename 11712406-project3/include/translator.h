@@ -14,11 +14,11 @@ class Record {
 
 public:
     enum CATEGORY {
-        R_INT, R_ID, R_FUNCTION, R_ASSIGN, 
+        R_INT, R_ID, R_FUNCTION, R_ASSIGN, R_PARAM,
         R_PLUS, R_MINUS, R_MUL, R_DIV,
         R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
         R_WHILE, R_AND, R_OR,
-        R_GOTO, R_LABEL, R_RETURN, R_PARAM
+        R_GOTO, R_LABEL, R_RETURN,
     } category;
     vector<string> args;
     Record(CATEGORY c, vector<string> args);
@@ -51,6 +51,10 @@ public:
     string     new_label();
 
     Translator();
+
+    void       init_read_func();
+    void       init_write_func();
+    void       init_sys_call();
 
     void       translate_tree            (Node*);
     void       translate_Program         (Node*);

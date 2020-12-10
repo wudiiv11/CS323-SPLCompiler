@@ -92,6 +92,31 @@ Expr::Expr() {}
 Expr::Expr(string id) : id(id) {}
 
 
+void Translator::init_read_func() {
+    Function* f = new Function();
+    f->args = new vector<Field*>();
+    f->ret = new Type("int");
+    f->name = "read";
+
+    store.insert("read", "none", new Type(f));
+}
+
+
+void Translator::init_write_func() {
+    Function* f = new Function();
+    f->args = new vector<Field*>();
+    f->args->push_back(new Field("arg", new Type("int")));
+    f->ret = new Type("int");
+    f->name = "write";
+}
+
+
+void Translator::init_sys_call() {
+    init_read_func();
+    init_write_func();
+}
+
+
 void Translator::translate_tree(Node* n) {
     translate_Program(n);
     for (auto i : codes)
@@ -118,7 +143,10 @@ void Translator::translate_ExtDef(Node* n) {
         translate_ExtDecList(n->children[1], t);
     if (n->children[1]->name == "FunDec") {
         Function* f = translate_FunDec(n->children[1], t);
-        codes.push_back(Record(Record::R_FUNCTION, 1, f->name));
+
+        Type* t = new Type(f);
+        store.insert(f->name, "none", t);
+
         translate_CompSt(n->children[2]);
     }
 }
@@ -164,7 +192,11 @@ Struct* Translator::translate_StructSpecifier(Node* n) {
 
 Field* Translator::translate_VarDec(Node* n, Type* t) {
     if (n->children[0]->name == "ID") {
-        Field* f = new Field(n->children[0]->text, f->type);
+        string name = n->children[0]->text;
+        string alias = new_field();
+        Field* f = new Field(name, t);
+        store.insert(name, alias, t);
+        return f;
     } else if (n->children[0]->name == "VarDec") {
         Array* arr = new Array(t, atoi(n->children[2]->text.c_str()));
         Type* type = new Type(arr);
@@ -177,9 +209,10 @@ Function* Translator::translate_FunDec(Node* n, Type* t) {
     Function* f = new Function();
     f->name = n->children[0]->text;
     f->ret = t;
+    codes.push_back(Record(Record::R_FUNCTION, 1, f->name));
     vector<Field*>* args = new vector<Field*>();
-    if (n->children.size() > 3) 
-        translate_VarList(n->children[3], args);
+    if (n->children[2]->name == "VarList") 
+        translate_VarList(n->children[2], args);
     f->args = args;
     return f;
 }
@@ -187,18 +220,13 @@ Function* Translator::translate_FunDec(Node* n, Type* t) {
 
 void Translator::translate_VarList(Node* n, vector<Field*>* fields) {
     Field* f = translate_ParamDec(n->children[0]);
-    fields->push_back(f);
+    // fields->push_back(f);
 }
 
 
 Field* Translator::translate_ParamDec(Node* n) {
     Type* t = translate_Specifier(n->children[0]);
     Field* f = translate_VarDec(n->children[1], t);
-
-    string alias = new_field();
-
-    store.insert(f->name, alias, t);
-    codes.push_back(Record(Record::R_PARAM, 1, alias));
     return f;
 }
 
@@ -297,12 +325,13 @@ Expr* Translator::translate_Exp(Node* n, string place) {
     if (arg1 == "Exp") {
         string arg2 = n->children[1]->name;
         if (arg2 == "ASSIGN") {
-            string tp1 = new_place();
-            string tp2 = new_place();
-            Expr* e = translate_Exp(n->children[0], tp1);
-            translate_Exp(n->children[2], tp2);
-            codes.push_back(Record(Record::R_ASSIGN, 2, e->id, tp2));
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, e->id));
+            string var = n->children[0]->children[0]->text;
+            Item* item = store.lookup(var);
+            string var_alias = item->alias;
+            string tp = new_place();
+            translate_Exp(n->children[2], tp);
+            codes.push_back(Record(Record::R_ASSIGN, 2, var_alias, tp));
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, var_alias));
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
             string lb_2 = new_label();
