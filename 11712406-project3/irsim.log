@@ -56,3 +56,11 @@ LABEL label3 :
 [INFO] 2020-12-10 04:45:50,408 (irsim.py 567): Program has exited gracefully
 [INFO] 2020-12-10 04:45:50,409 (irsim.py 567): Total instructions = 49
 [INFO] 2020-12-10 04:45:57,168 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:46:20,393 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:46:20,394 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:47:31,241 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:47:37,268 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:47:37,269 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:47:38,608 (irsim.py 567): Program has exited gracefully
+[INFO] 2020-12-10 04:47:38,609 (irsim.py 567): Total instructions = 49
+[INFO] 2020-12-10 04:47:40,362 (irsim.py 567): KeyboardInterrupt raised, quit program

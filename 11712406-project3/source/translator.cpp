@@ -319,9 +319,6 @@ void Translator::translate_DefList(Node* n, vector<Field*>* fields) {
 
 Expr* Translator::translate_Exp(Node* n, string place) {
     Expr* expr = new Expr();
-    // todo 考虑 read / write
-
-    // cout << n->children[0]->name << endl;
 
     string arg1 = n->children[0]->name;
     if (arg1 == "Exp") {
@@ -377,7 +374,7 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         } else if (n->children[0]->text == "write") {
             string tp = new_place();
             translate_Exp(n->children[2]->children[0], tp);
-            codes.push_back(Record(Record::R_WRITE, 1, place));
+            codes.push_back(Record(Record::R_WRITE, 1, tp));
         } else {
             Item* item = store.lookup(n->children[0]->text);
             if (n->children[2]->name == "Args") {
