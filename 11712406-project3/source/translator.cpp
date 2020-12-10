@@ -96,7 +96,6 @@ void Translator::translate_tree(Node* n) {
     translate_Program(n);
     for (auto i : codes)
         cout << i.to_string() << endl;
-    cout << (store.lookup("main") == nullptr) << endl;
 }
 
 
@@ -116,7 +115,7 @@ void Translator::translate_ExtDefList(Node* n) {
 void Translator::translate_ExtDef(Node* n) {
     Type* t = translate_Specifier(n->children[0]);
     if (n->children[1]->name == "ExtDecList")
-        translate_ExtDecList(n->children[1]);
+        translate_ExtDecList(n->children[1], t);
     if (n->children[1]->name == "FunDec") {
         Function* f = translate_FunDec(n->children[1], t);
         codes.push_back(Record(Record::R_FUNCTION, 1, f->name));
@@ -125,10 +124,10 @@ void Translator::translate_ExtDef(Node* n) {
 }
 
 
-void Translator::translate_ExtDecList(Node* n) {
-    translate_VarDec(n->children[0]);
+void Translator::translate_ExtDecList(Node* n, Type* t) {
+    translate_VarDec(n->children[0], t);
     if (n->children.size() > 1)
-        translate_ExtDecList(n->children[2]);
+        translate_ExtDecList(n->children[2], t);
 }
 
 
@@ -147,7 +146,6 @@ Type* Translator::translate_Specifier(Node* n) {
 
 
 Struct* Translator::translate_StructSpecifier(Node* n) {
-    Struct* ret = new Struct();
 
     store.add_scope();
 
@@ -155,10 +153,8 @@ Struct* Translator::translate_StructSpecifier(Node* n) {
     vector<Field*>* fields = new vector<Field*>();
     if (n->children.size() == 5)
         translate_DefList(n->children[3], fields);
-    store.insert_struct(name, fields);
 
-    ret->name = name;
-    ret->fields = fields;
+    Struct* ret = new Struct(name, fields);
 
     store.sub_scope();
 
@@ -199,10 +195,10 @@ Field* Translator::translate_ParamDec(Node* n) {
     Type* t = translate_Specifier(n->children[0]);
     Field* f = translate_VarDec(n->children[1], t);
 
+    string alias = new_field();
 
-    store.insert_var(f->name);
-    string s = new_field();
-    codes.push_back(Record(Record::R_PARAM, 1, new_field()));
+    store.insert(f->name, alias, t);
+    codes.push_back(Record(Record::R_PARAM, 1, alias));
     return f;
 }
 
@@ -263,8 +259,8 @@ void Translator::translate_Stmt(Node* n) {
 }
 
 
-void Translator::translate_Dec(Node* n) {
-    translate_VarDec(n->children[0]);
+void Translator::translate_Dec(Node* n, Type* t) {
+    translate_VarDec(n->children[0], t);
     if (n->children.size() > 1) {
         string tp = new_place();
         translate_Exp(n->children[2], tp);
@@ -273,15 +269,15 @@ void Translator::translate_Dec(Node* n) {
 
 
 void Translator::translate_Def(Node* n) {
-    translate_Specifier(n->children[0]);
-    translate_DecList(n->children[1]);
+    Type* t = translate_Specifier(n->children[0]);
+    translate_DecList(n->children[1], t);
 }
 
 
-void Translator::translate_DecList(Node* n) {
-    translate_Dec(n->children[0]);
+void Translator::translate_DecList(Node* n, Type* t) {
+    translate_Dec(n->children[0], t);
     if (n->children.size() > 1)
-        translate_DecList(n->children[2]);
+        translate_DecList(n->children[2], t);
 }
 
 

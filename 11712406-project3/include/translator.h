@@ -56,7 +56,7 @@ public:
     void       translate_Program         (Node*);
     void       translate_ExtDefList      (Node*);
     void       translate_ExtDef          (Node*);
-    void       translate_ExtDecList      (Node*);
+    void       translate_ExtDecList      (Node*, Type*);
     Type*      translate_Specifier       (Node*);
     Struct*    translate_StructSpecifier (Node*);
     Field*     translate_VarDec          (Node*, Type*);
@@ -68,8 +68,8 @@ public:
     void       translate_Stmt            (Node*);
     void       translate_DefList         (Node*, vector<Field*>*);
     void       translate_Def             (Node*);
-    void       translate_DecList         (Node*);
-    void       translate_Dec             (Node*);
+    void       translate_DecList         (Node*, Type*);
+    void       translate_Dec             (Node*, Type*);
     Expr*      translate_Exp             (Node*, string);
     void       translate_Args            (Node*);
     void       translate_cond_Exp        (Node*, string, string);
