@@ -139,15 +139,22 @@ Type* Translator::translate_Specifier(Node* n) {
 
 
 Struct* Translator::translate_StructSpecifier(Node* n) {
+    Struct* ret = new Struct();
+
     store.add_scope();
-    if (n->children.size() == 2) {
-        store.insert_struct(n->children[1]->text, new vector<Field*>());
-    } else if (n->children.size() == 5) {
-        vector<Field*>* fields = new vector<Field*>();
+
+    string name = n->children[1]->text;
+    vector<Field*>* fields = new vector<Field*>();
+    if (n->children.size() == 5)
         translate_DefList(n->children[3], fields);
-        store.insert_struct(n->children[1]->text, fields);
-    }
+    store.insert_struct(name, fields);
+
+    ret->name = name;
+    ret->fields = fields;
+
     store.sub_scope();
+
+    return ret;
 }
 
 
