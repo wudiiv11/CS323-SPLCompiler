@@ -1,0 +1,49 @@
+[DEBUG] 2020-12-10 04:08:36,504 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:08:36,505 (irsim.py 581): Line 1 does not belong to any function:
+Program (1)
+[ERROR] 2020-12-10 04:08:36,505 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist
+[DEBUG] 2020-12-10 04:09:11,800 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:09:11,801 (irsim.py 581): Line 1 does not belong to any function:
+Program (1)
+[ERROR] 2020-12-10 04:09:11,801 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist
+[DEBUG] 2020-12-10 04:11:37,505 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:11:37,506 (irsim.py 581): Syntax error at line 7:
+LABEL label1
+[ERROR] 2020-12-10 04:11:37,506 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist
+[DEBUG] 2020-12-10 04:15:48,496 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:15:48,497 (irsim.py 581): Syntax error at line 7:
+LABEL label1
+[ERROR] 2020-12-10 04:15:48,497 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist
+[DEBUG] 2020-12-10 04:17:57,613 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:17:57,614 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:18:32,781 (irsim.py 567): Program has exited gracefully
+[INFO] 2020-12-10 04:18:32,782 (irsim.py 567): Total instructions = 53
+[WARNING] 2020-12-10 04:18:40,329 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:45,748 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:50,716 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:51,223 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:51,461 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:51,651 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[WARNING] 2020-12-10 04:18:51,847 (irsim.py 574): Program Counter goes out of bound. The running program will be terminated instantly
+[INFO] 2020-12-10 04:18:55,756 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:18:57,139 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:18:57,141 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:30:32,897 (irsim.py 567): Program has exited gracefully
+[INFO] 2020-12-10 04:30:32,898 (irsim.py 567): Total instructions = 53
+[INFO] 2020-12-10 04:30:37,258 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:30:38,570 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:30:38,571 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:38:22,359 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:38:36,603 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:38:36,604 (irsim.py 581): Duplicated label label3 at line 20:
+LABEL label3 :
+[ERROR] 2020-12-10 04:38:36,605 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist
+[DEBUG] 2020-12-10 04:39:13,869 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[INFO] 2020-12-10 04:39:13,870 (irsim.py 567): File loaded successfully
+[INFO] 2020-12-10 04:39:15,615 (irsim.py 567): Program has exited gracefully
+[INFO] 2020-12-10 04:39:15,615 (irsim.py 567): Total instructions = 53
+[INFO] 2020-12-10 04:39:17,491 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 04:40:10,489 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 04:40:10,491 (irsim.py 581): Duplicated label label3 at line 20:
+LABEL label3 :
+[ERROR] 2020-12-10 04:40:10,491 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist

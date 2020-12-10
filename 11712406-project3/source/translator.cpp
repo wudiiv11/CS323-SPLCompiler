@@ -60,7 +60,7 @@ string Record::to_string() {
     case R_GOTO:
         return "GOTO " + args[0];
     case R_LABEL:
-        return "LABEL " + args[0];
+        return "LABEL " + args[0] + " :";
     case R_RETURN:
         return "RETURN " + args[0];
     case R_FUNCTION:
@@ -72,6 +72,9 @@ string Record::to_string() {
     case R_WRITE:
         return "WRITE " + args[0];
     case R_CALL:
+        return args[0] + " := CALL " + args[1];
+    case R_ARG:
+        return "ARG " + args[0];
     default:
         return "error";
     }
@@ -79,17 +82,17 @@ string Record::to_string() {
 
 
 string Translator::new_place() {
-    return string("t" + to_string(place_cnt++));
+    return string("t" + to_string(++place_cnt));
 }
 
 
 string Translator::new_field() {
-    return string("v" + to_string(field_cnt++));
+    return string("v" + to_string(++field_cnt));
 }
 
 
 string Translator::new_label() {
-    return string("label" + to_string(label_cnt++));
+    return string("label" + to_string(++label_cnt));
 }
 
 
@@ -97,37 +100,7 @@ Expr::Expr() {}
 Expr::Expr(string id) : id(id) {}
 
 
-void Translator::init_read_func() {
-    Function* f = new Function();
-    f->args = new vector<Field*>();
-    f->ret = new Type("int");
-    f->name = "read";
-
-    store.insert("read", "READ", new Type(f));
-    Item* item = store.lookup("read");
-}
-
-
-void Translator::init_write_func() {
-    Function* f = new Function();
-    f->args = new vector<Field*>();
-    f->args->push_back(new Field("arg", new Type("int")));
-    f->ret = new Type("int");
-    f->name = "write";
-
-    store.insert("write", "WRITE", new Type(f));
-}
-
-
-void Translator::init_sys_call() {
-    init_read_func();
-    init_write_func();
-}
-
-
 void Translator::translate_tree(Node* n) {
-    init_sys_call();
-
     translate_Program(n);
     for (auto i : codes)
         cout << i.to_string() << endl;
@@ -155,7 +128,7 @@ void Translator::translate_ExtDef(Node* n) {
         Function* f = translate_FunDec(n->children[1], t);
 
         Type* t = new Type(f);
-        store.insert(f->name, "none", t);
+        store.insert(f->name, f->name, t);
 
         translate_CompSt(n->children[2]);
     }
@@ -223,6 +196,9 @@ Function* Translator::translate_FunDec(Node* n, Type* t) {
     vector<Field*>* args = new vector<Field*>();
     if (n->children[2]->name == "VarList") 
         translate_VarList(n->children[2], args);
+    for (auto i : *args) {
+        codes.push_back(Record(Record::R_PARAM, 1, store.lookup(i->name)->alias));
+    }
     f->args = args;
     return f;
 }
@@ -244,8 +220,15 @@ Field* Translator::translate_ParamDec(Node* n) {
 void Translator::translate_CompSt(Node* n) {
     store.add_scope();
 
-    translate_DefList(n->children[1], new vector<Field*>());
-    translate_StmtList(n->children[2]);
+    if (n->children.size() == 3) {
+        if (n->children[1]->name == "DefList")
+            translate_DefList(n->children[1], new vector<Field*>());
+        else
+            translate_StmtList(n->children[1]);
+    } else if (n->children.size() == 4) {
+        translate_DefList(n->children[1], new vector<Field*>());
+        translate_StmtList(n->children[2]);
+    }
 
     store.sub_scope();
 }
@@ -274,6 +257,21 @@ void Translator::translate_Stmt(Node* n) {
         string lb_1 = new_label();
         string lb_2 = new_label();
         string lb_3 = new_label();
+        if (n->children.size() > 5) {
+            translate_cond_Exp(n->children[2], lb_1, lb_2);
+            codes.push_back(Record(Record::R_LABEL, 1, lb_1));
+            translate_Stmt(n->children[4]);
+            codes.push_back(Record(Record::R_LABEL, 1, lb_3));
+            codes.push_back(Record(Record::R_LABEL, 1, lb_2));
+            translate_Stmt(n->children[6]);
+            codes.push_back(Record(Record::R_LABEL, 1, lb_3));
+        } else {
+            translate_cond_Exp(n->children[2], lb_1, lb_2);
+            codes.push_back(Record(Record::R_LABEL, 1, lb_1));
+            translate_Stmt(n->children[4]);
+            codes.push_back(Record(Record::R_LABEL, 1, lb_2));
+        }
+
         translate_cond_Exp(n->children[2], lb_1, lb_2);
         codes.push_back(Record(Record::R_LABEL, 1, lb_1));
         translate_Stmt(n->children[4]);
@@ -290,7 +288,7 @@ void Translator::translate_Stmt(Node* n) {
         translate_cond_Exp(n->children[2], lb_2, lb_3);
         codes.push_back(Record(Record::R_LABEL, 1, lb_2));
         translate_Stmt(n->children[4]);
-        codes.push_back(Record(Record::R_GOTO, 1, lb_1));
+        codes.push_back(Record(Record::R_GOTO, 1, lb_1)); 
         codes.push_back(Record(Record::R_LABEL, 1, lb_3));
     }
 }
@@ -387,11 +385,17 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             string tp = new_place();
             translate_Exp(n->children[2]->children[0], tp);
             codes.push_back(Record(Record::R_WRITE, 1, place));
-        } else if (n->children[2]->name == "Args") {
-        
         } else {
-            // Item* item = store.lookup(n->children[0]->text);
-            // codes.push_back(Record(Record::R_CALL, 2, item->alias, place));
+            Item* item = store.lookup(n->children[0]->text);
+            if (n->children[2]->name == "Args") {
+                vector<string>* args = new vector<string>();
+                translate_Args(n->children[2], args);
+                args->reserve(args->size());
+                for (auto i : *args) {
+                    codes.push_back(Record(Record::R_ARG, 1, i));
+                }
+            }
+            codes.push_back(Record(Record::R_CALL, 2, place, item->alias));
         }
     } else if (arg1 == "INT") {
         codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
@@ -399,6 +403,16 @@ Expr* Translator::translate_Exp(Node* n, string place) {
 
     return expr;
 }
+
+
+void Translator::translate_Args(Node* n, vector<string>* args) {
+    string tp = new_place();
+    translate_Exp(n->children[0], tp);
+    args->push_back(tp);
+    if (n->children.size() > 1)
+        translate_Args(n->children[2], args);
+}
+
 
 void Translator::translate_cond_Exp(Node* n, string lb_t, string lb_f) {
     string op = n->children[1]->name;
