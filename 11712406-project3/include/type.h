@@ -16,7 +16,7 @@ class Type {
 
 public:
     string name;
-    enum {
+    enum CATEGORY{
         T_PRIMITIVE, 
         T_ARRAY, 
         T_STRUCTURE,
@@ -29,10 +29,11 @@ public:
         Function *funcion;
     };
 
-    Type(){}
+    Type();
     Type(string primitive);
     Type(Array* array);
-    Type(string name, vector<Field*>* fields);
+    Type(Struct* structure);
+    Type(Function* func);
     bool operator== (const Type& t) const;
     bool isTypeOf(const string& name) const;
 };
@@ -42,6 +43,8 @@ class Array {
 public:
     Type* base;
     int size;
+
+    Array();
     Array(Type* base, int size);
     bool operator== (const Array& arr) const;
 
@@ -53,7 +56,8 @@ public:
     string name;
     Type* type;
 
-    Field(string name, Type* type) : name(name), type(type) {}
+    Field();
+    Field(string name, Type* type);
 };
 
 class Struct {
@@ -62,8 +66,8 @@ public:
     string name;
     vector<Field*>* fields;
 
-    Struct(){}
-    Struct(string name, vector<Field*>* fields) : name(name), fields(fields) {}
+    Struct();
+    Struct(string name, vector<Field*>* fields);
 };
 
 class Function {
@@ -73,8 +77,8 @@ public:
     Type* ret;
     vector<Field*>* args;
 
-    Function(){}
-    Function(string name, Type* ret, vector<Field*>* args) : name(name), ret(ret), args(args) {}
+    Function();
+    Function(string name, Type* ret, vector<Field*>* args);
 };
 
 #endif

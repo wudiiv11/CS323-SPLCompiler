@@ -6,14 +6,7 @@ Item::Item() {}
 Store::Store() {}
 
 
-Item* Store::lookup(string str) {
-    if (table.find(str) == table.end() || table[str].empty())
-        return nullptr;
-    return table[str].front();
-}
-
-
-Item* Store::lookup(string str, Item::CATEGORY c) {
+Item* Store::lookup(string str, Type::CATEGORY c) {
     if (table.find(str) == table.end() || table[str].empty())
         return nullptr;
     for (auto i : table[str])
@@ -29,43 +22,12 @@ void Store::ensure_table_entry(string name) {
 }
 
 
-void Store::insert_var(string name, Type* type) {
+void Store::insert(string name, string alias, Type* type) {
     ensure_table_entry(name);
     Item* item = new Item();
-    vector<Type*> types;
-    item->types->push_back(type);
-    item->category == Item::I_VARIABLE;
-    insert(name, item);
-}
-
-
-void Store::insert_fun(string name, vector<Type*>* args) {
-    ensure_table_entry(name);
-    Item* item = new Item();
-    item->types = args;
-    item->category == Item::I_FUNCTION;
-    insert(name, item);
-}
-
-
-void Store::insert_struct(string name, vector<Field*>* fields) {
-    ensure_table_entry(name);
-    Item* item = new Item();
-    item->fields = fields;
-    item->category == Item::I_STRUCT;
-    insert(name, item);
-}
-
-
-void Store::insert(string name, Item* item) {
-    ensure_table_entry(name);
-    table[name].push_front(item);
-    scope.back().push_back(name);
-}
-
-
-void Store::remove(string name) {
-    table[name].pop_front();
+    
+    // table[name].push_front(item);
+    // scope.back().push_back(name);
 }
 
 

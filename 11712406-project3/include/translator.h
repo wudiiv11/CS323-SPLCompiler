@@ -14,13 +14,11 @@ class Record {
 
 public:
     enum CATEGORY {
-        R_INT, 
-        R_ID, R_FUNCTION,
-        R_ASSIGN, 
+        R_INT, R_ID, R_FUNCTION, R_ASSIGN, 
         R_PLUS, R_MINUS, R_MUL, R_DIV,
         R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
         R_WHILE, R_AND, R_OR,
-        R_GOTO, R_LABEL, R_RETURN,
+        R_GOTO, R_LABEL, R_RETURN, R_PARAM
     } category;
     vector<string> args;
     Record(CATEGORY c, vector<string> args);
@@ -41,6 +39,7 @@ public:
 class Translator {
 private:
     static int place_cnt;
+    static int field_cnt;
     static int label_cnt;
 
     Store store;
@@ -48,6 +47,7 @@ private:
 
 public:
     string     new_place();
+    string     new_field();
     string     new_label();
 
     Translator();
@@ -59,10 +59,10 @@ public:
     void       translate_ExtDecList      (Node*);
     Type*      translate_Specifier       (Node*);
     Struct*    translate_StructSpecifier (Node*);
-    void       translate_VarDec          (Node*);
+    Field*     translate_VarDec          (Node*, Type*);
     Function*  translate_FunDec          (Node*, Type*);
     void       translate_VarList         (Node*, vector<Field*>*);
-    void       translate_ParamDec        (Node*);
+    Field*     translate_ParamDec        (Node*);
     void       translate_CompSt          (Node*);
     void       translate_StmtList        (Node*);
     void       translate_Stmt            (Node*);

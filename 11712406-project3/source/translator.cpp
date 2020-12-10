@@ -3,6 +3,7 @@
 #include <iostream>
 
 int Translator::place_cnt = 0;
+int Translator::field_cnt = 0;
 int Translator::label_cnt = 0;
 
 Translator::Translator() {}
@@ -64,6 +65,8 @@ string Record::to_string() {
         return "RETURN " + args[0];
     case R_FUNCTION:
         return "FUNCTION " + args[0] + " :";
+    case R_PARAM:
+        return "PARAM " + args[0];
     default:
         return "error";
     }
@@ -72,6 +75,11 @@ string Record::to_string() {
 
 string Translator::new_place() {
     return string("t" + to_string(place_cnt++));
+}
+
+
+string Translator::new_field() {
+    return string("v" + to_string(field_cnt++));
 }
 
 
@@ -158,8 +166,14 @@ Struct* Translator::translate_StructSpecifier(Node* n) {
 }
 
 
-void Translator::translate_VarDec(Node* n) {
-    // nothing to translate
+Field* Translator::translate_VarDec(Node* n, Type* t) {
+    if (n->children[0]->name == "ID") {
+        Field* f = new Field(n->children[0]->text, f->type);
+    } else if (n->children[0]->name == "VarDec") {
+        Array* arr = new Array(t, atoi(n->children[2]->text.c_str()));
+        Type* type = new Type(arr);
+        return translate_VarDec(n->children[0], type);        
+    }
 }
 
 
@@ -176,13 +190,20 @@ Function* Translator::translate_FunDec(Node* n, Type* t) {
 
 
 void Translator::translate_VarList(Node* n, vector<Field*>* fields) {
-
+    Field* f = translate_ParamDec(n->children[0]);
+    fields->push_back(f);
 }
 
 
-void Translator::translate_ParamDec(Node* n) {
-    translate_Specifier(n->children[0]);
-    translate_VarDec(n->children[1]);
+Field* Translator::translate_ParamDec(Node* n) {
+    Type* t = translate_Specifier(n->children[0]);
+    Field* f = translate_VarDec(n->children[1], t);
+
+
+    store.insert_var(f->name);
+    string s = new_field();
+    codes.push_back(Record(Record::R_PARAM, 1, new_field()));
+    return f;
 }
 
 
@@ -228,16 +249,16 @@ void Translator::translate_Stmt(Node* n) {
             translate_Stmt(n->children[6]);
             codes.push_back(Record(Record::R_LABEL, 1, lb_3));
         }
-    // } else if (s == "WHILE") {
-    //     string lb_1 = new_label();
-    //     string lb_2 = new_label();
-    //     string lb_3 = new_label();
-    //     codes.push_back(Record(Record::R_LABEL, 1, lb_1));
-    //     translate_cond_Exp(n->children[2], lb_2, lb_3);
-    //     codes.push_back(Record(Record::R_LABEL, 1, lb_2));
-    //     translate_Stmt(n->children[4]);
-    //     codes.push_back(Record(Record::R_GOTO, 1, lb_1));
-    //     codes.push_back(Record(Record::R_LABEL, 1, lb_3));
+    } else if (s == "WHILE") {
+        string lb_1 = new_label();
+        string lb_2 = new_label();
+        string lb_3 = new_label();
+        codes.push_back(Record(Record::R_LABEL, 1, lb_1));
+        translate_cond_Exp(n->children[2], lb_2, lb_3);
+        codes.push_back(Record(Record::R_LABEL, 1, lb_2));
+        translate_Stmt(n->children[4]);
+        codes.push_back(Record(Record::R_GOTO, 1, lb_1));
+        codes.push_back(Record(Record::R_LABEL, 1, lb_3));
     }
 }
 
@@ -305,7 +326,7 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
         }
     } else if (arg1 == "LP") {
-        
+        translate_Exp(n->children[1], place);
     } else if (arg1 == "MINUS") {
         string tp = new_place();
         translate_Exp(n->children[1], tp);
