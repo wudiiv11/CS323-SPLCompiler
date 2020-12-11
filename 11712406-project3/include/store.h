@@ -27,7 +27,7 @@ private:
     void ensure_table_entry(string name);
 
 public:
-    vector<vector<string>> scope;
+    vector<vector<string>*> scope;
     unordered_map<string, list<Item*>> table;
     
     Store();

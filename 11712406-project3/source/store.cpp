@@ -1,10 +1,11 @@
 #include "../include/store.h"
+#include <iostream>
 
 Item::Item() {}
 
 
 Store::Store() {
-    scope.push_back(vector<string>());
+    scope.push_back(new vector<string>());
 }
 
 
@@ -37,18 +38,20 @@ void Store::insert(string name, string alias, Type* type) {
     item->alias = alias;
     item->t = type;
     table[name].push_front(item);
-    scope.back().push_back(name);
+    scope.back()->push_back(name);
 }
 
 
 void Store::add_scope() {
-    scope.push_back(vector<string>());
+    scope.push_back(new vector<string>());
 }
 
 
 void Store::sub_scope() {
-    vector<string> v = scope.back();
+    vector<string>* v = scope.back();
     scope.pop_back();
-    for (auto k : v)
+    for (auto k : *v)
         table[k].pop_front();
+    // delete居然报错了？？？
+    // delete v;
 }

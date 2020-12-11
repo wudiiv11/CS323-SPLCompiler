@@ -99,6 +99,11 @@ string Translator::new_label() {
 Expr::Expr() {}
 Expr::Expr(string id) : id(id) {}
 
+int Translator::get_field_offset(string obj, string field) {
+    Item* item = store.lookup(obj);
+    return 1;
+}
+
 
 void Translator::translate_tree(Node* n) {
     translate_Program(n);
@@ -145,13 +150,14 @@ void Translator::translate_ExtDecList(Node* n, Type* t) {
 Type* Translator::translate_Specifier(Node* n) {
     Type* t = new Type();
     Node* child = n->children[0];
-    if (n->name == "TYPE") {
+    if (child->name == "TYPE") {
         t->primitive = child->text;
         t->category = Type::T_PRIMITIVE;
-    } else if (n->name == "StructSpecifier") {
+    } else if (child->name == "StructSpecifier") {
         t->structure = translate_StructSpecifier(child);
         t->category = Type::T_STRUCTURE;
     }
+
     return t;
 }
 
@@ -348,6 +354,10 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             else if (arg2 == "MINUS") codes.push_back(Record(Record::R_MINUS, 3, place, tp1, tp2));
             else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
+        } else if (arg2 == "DOT") {
+            string tp = new_place();
+            Expr* e = translate_Exp(n->children[0], tp);
+            int offset = get_field_offset(e->id, n->children[2]->text);
         }
     } else if (arg1 == "LP") {
         translate_Exp(n->children[1], place);
@@ -364,6 +374,7 @@ Expr* Translator::translate_Exp(Node* n, string place) {
         codes.push_back(Record(Record::R_ASSIGN, 1, "#1"));
         codes.push_back(Record(Record::R_LABEL, 1, lb_2));
     } else if (arg1 == "ID") {
+        // 对 read/write 函数进行特判
         if (n->children.size() == 1) {
             string var = n->children[0]->text;
             Item* item = store.lookup(var);

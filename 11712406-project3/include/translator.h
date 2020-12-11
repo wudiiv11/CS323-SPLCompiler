@@ -53,6 +53,8 @@ public:
 
     Translator();
 
+    int        get_field_offset          (string, string);
+
     void       translate_tree            (Node*);
     void       translate_Program         (Node*);
     void       translate_ExtDefList      (Node*);
