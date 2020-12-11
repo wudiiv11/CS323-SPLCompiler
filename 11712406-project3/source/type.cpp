@@ -50,6 +50,17 @@ Struct::Struct(string name, vector<Field*>* fields) {
     this->fields = fields;
 }
 
+int Struct::offset_of(string field) {
+    int cnt = 0;
+    for (auto i : *fields) {
+        if (i->name == field) {
+            return cnt << 2;
+        }
+        cnt += 1;
+    }
+    return -1;
+}
+
 
 Function::Function() {}
 

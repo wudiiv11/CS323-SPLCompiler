@@ -68,6 +68,8 @@ public:
 
     Struct();
     Struct(string name, vector<Field*>* fields);
+
+    int offset_of(string field);
 };
 
 class Function {

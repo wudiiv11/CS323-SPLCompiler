@@ -81,3 +81,7 @@ Program (1)
 [DEBUG] 2020-12-10 21:12:46,170 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '3', 'logpath': 'irsim.log'}
 [INFO] 2020-12-10 21:12:46,171 (irsim.py 567): File loaded successfully
 [INFO] 2020-12-10 21:12:48,176 (irsim.py 567): KeyboardInterrupt raised, quit program
+[DEBUG] 2020-12-10 22:05:47,704 (irsim.py 620): Parsed arguments: {'irpath': 'out.ir', 'inputs': '4', 'logpath': 'irsim.log'}
+[ERROR] 2020-12-10 22:05:47,705 (irsim.py 581): Line 1 does not belong to any function:
+n v1 0
+[ERROR] 2020-12-10 22:05:47,706 (irsim.py 581): Cannot find program entrance. Please make sure the 'main' function does exist

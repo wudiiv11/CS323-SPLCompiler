@@ -37,6 +37,8 @@ string Record::to_string() {
         return args[0] + " := " + args[1];
     case R_ASSIGN:
         return args[0] + " := " + args[1];
+    case R_OFFSET:
+        return args[0] + " := " + args[1] + " + #" + args[2];
     case R_PLUS:
         return args[0] + " := " + args[1] + " + " + args[2];
     case R_MINUS:
@@ -101,7 +103,13 @@ Expr::Expr(string id) : id(id) {}
 
 int Translator::get_field_offset(string obj, string field) {
     Item* item = store.lookup(obj);
-    return 1;
+    Type* t = item->t;
+    for (int i = 0; i < t->structure->fields->size(); ++i) {
+        if (field == (*t->structure->fields)[i]->name) {
+            return i << 2;
+        }
+    }
+    return -1;
 }
 
 
@@ -164,16 +172,21 @@ Type* Translator::translate_Specifier(Node* n) {
 
 Struct* Translator::translate_StructSpecifier(Node* n) {
 
-    store.add_scope();
-
     string name = n->children[1]->text;
-    vector<Field*>* fields = new vector<Field*>();
-    if (n->children.size() == 5)
+    Struct* ret;
+    if (n->children.size() == 5) {
+        vector<Field*>* fields = new vector<Field*>();
+
+        store.add_scope();
         translate_DefList(n->children[3], fields);
+        store.sub_scope();
 
-    Struct* ret = new Struct(name, fields);
-
-    store.sub_scope();
+        ret = new Struct(name, fields);
+        store.insert(name, name, new Type(ret));
+    } else {
+        Item* item = store.lookup(name);
+        ret = store.lookup(name, Type::T_STRUCTURE)->t->structure;
+    }
 
     return ret;
 }
@@ -293,8 +306,9 @@ void Translator::translate_Stmt(Node* n) {
 }
 
 
-void Translator::translate_Dec(Node* n, Type* t) {
-    translate_VarDec(n->children[0], t);
+void Translator::translate_Dec(Node* n, Type* t, vector<Field*>* fields) {
+    Field* f = translate_VarDec(n->children[0], t);
+    fields->push_back(f);
     if (n->children.size() > 1) {
         string tp = new_place();
         translate_Exp(n->children[2], tp);
@@ -302,22 +316,22 @@ void Translator::translate_Dec(Node* n, Type* t) {
 }
 
 
-void Translator::translate_Def(Node* n) {
+void Translator::translate_Def(Node* n, vector<Field*>* fields) {
     Type* t = translate_Specifier(n->children[0]);
-    translate_DecList(n->children[1], t);
+    translate_DecList(n->children[1], t, fields);
 }
 
 
-void Translator::translate_DecList(Node* n, Type* t) {
-    translate_Dec(n->children[0], t);
+void Translator::translate_DecList(Node* n, Type* t, vector<Field*>* fields) {
+    translate_Dec(n->children[0], t, fields);
     if (n->children.size() > 1)
-        translate_DecList(n->children[2], t);
+        translate_DecList(n->children[2], t, fields);
 }
 
 
 void Translator::translate_DefList(Node* n, vector<Field*>* fields) {
     if (n->children[0]->name == "Def")
-        translate_Def(n->children[0]);
+        translate_Def(n->children[0], fields);
     if (n->children.size() > 1)
         translate_DefList(n->children[1], fields);
 }
@@ -355,9 +369,11 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
         } else if (arg2 == "DOT") {
-            string tp = new_place();
-            Expr* e = translate_Exp(n->children[0], tp);
-            int offset = get_field_offset(e->id, n->children[2]->text);
+            Expr* e = translate_Exp(n->children[0], new_place());
+            int offset = e->t->structure->offset_of(n->children[2]->text);
+            string addr = new_place();
+            codes.push_back(Record(Record::R_OFFSET, 3, addr, e->addr, to_string(offset)));
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, "*" + addr));
         }
     } else if (arg1 == "LP") {
         translate_Exp(n->children[1], place);
@@ -380,6 +396,8 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             Item* item = store.lookup(var);
             codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
             expr->id = n->children[0]->text;
+            expr->t = item->t;
+            expr->addr = "&" + item->alias;
         } else if (n->children[0]->text == "read") {
             codes.push_back(Record(Record::R_READ, 1, place));
         } else if (n->children[0]->text == "write") {

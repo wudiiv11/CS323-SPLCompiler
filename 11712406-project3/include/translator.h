@@ -14,7 +14,8 @@ class Record {
 
 public:
     enum CATEGORY {
-        R_INT, R_ID, R_FUNCTION, R_ASSIGN,
+        R_INT, R_ID, R_FUNCTION,
+        R_ASSIGN, R_OFFSET,
         R_PLUS, R_MINUS, R_MUL, R_DIV,
         R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
         R_WHILE, R_AND, R_OR,
@@ -32,6 +33,8 @@ class Expr {
 
 public:
     string id;
+    string addr;
+    Type* t;
 
     Expr();
     Expr(string id);
@@ -70,9 +73,9 @@ public:
     void       translate_StmtList        (Node*);
     void       translate_Stmt            (Node*);
     void       translate_DefList         (Node*, vector<Field*>*);
-    void       translate_Def             (Node*);
-    void       translate_DecList         (Node*, Type*);
-    void       translate_Dec             (Node*, Type*);
+    void       translate_Def             (Node*, vector<Field*>*);
+    void       translate_DecList         (Node*, Type*, vector<Field*>*);
+    void       translate_Dec             (Node*, Type*, vector<Field*>*);
     Expr*      translate_Exp             (Node*, string);
     void       translate_Args            (Node*, vector<string>*);
     void       translate_cond_Exp        (Node*, string, string);
