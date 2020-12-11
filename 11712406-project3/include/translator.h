@@ -20,7 +20,7 @@ public:
         R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
         R_WHILE, R_AND, R_OR,
         R_GOTO, R_LABEL, R_READ, R_WRITE,
-        R_RETURN, R_CALL, R_PARAM, R_ARG,
+        R_RETURN, R_CALL, R_PARAM, R_ARG, R_DEC,
     } category;
     vector<string> args;
     Record(CATEGORY c, vector<string> args);
@@ -56,7 +56,8 @@ public:
 
     Translator();
 
-    int        get_field_offset          (string, string);
+    /* 在转换成三地址码时配合translate_DefList声明变量大小 */
+    void       declare_size              (vector<Field*>*);
 
     void       translate_tree            (Node*);
     void       translate_Program         (Node*);

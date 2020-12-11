@@ -77,6 +77,8 @@ string Record::to_string() {
         return args[0] + " := CALL " + args[1];
     case R_ARG:
         return "ARG " + args[0];
+    case R_DEC:
+        return "DEC " + args[0] + " " + args[1];
     default:
         return "error";
     }
@@ -100,17 +102,6 @@ string Translator::new_label() {
 
 Expr::Expr() {}
 Expr::Expr(string id) : id(id) {}
-
-int Translator::get_field_offset(string obj, string field) {
-    Item* item = store.lookup(obj);
-    Type* t = item->t;
-    for (int i = 0; i < t->structure->fields->size(); ++i) {
-        if (field == (*t->structure->fields)[i]->name) {
-            return i << 2;
-        }
-    }
-    return -1;
-}
 
 
 void Translator::translate_tree(Node* n) {
@@ -179,6 +170,7 @@ Struct* Translator::translate_StructSpecifier(Node* n) {
 
         store.add_scope();
         translate_DefList(n->children[3], fields);
+        declare_size(fields);
         store.sub_scope();
 
         ret = new Struct(name, fields);
@@ -236,16 +228,29 @@ Field* Translator::translate_ParamDec(Node* n) {
 }
 
 
+void Translator::declare_size(vector<Field*>* fields) {
+    for (auto i : *fields) {
+        Item* item = store.lookup(i->name);
+        if (item->t->size() > 4)
+            codes.push_back(Record(Record::R_DEC, 2, item->alias, to_string(item->t->size())));
+    }
+}
+
+
 void Translator::translate_CompSt(Node* n) {
     store.add_scope();
 
+    vector<Field*>* fields = new vector<Field*>();
+
     if (n->children.size() == 3) {
-        if (n->children[1]->name == "DefList")
-            translate_DefList(n->children[1], new vector<Field*>());
-        else
+        if (n->children[1]->name == "DefList") {
+            translate_DefList(n->children[1], fields);
+            declare_size(fields);
+        } else
             translate_StmtList(n->children[1]);
     } else if (n->children.size() == 4) {
-        translate_DefList(n->children[1], new vector<Field*>());
+        translate_DefList(n->children[1], fields);
+        declare_size(fields);
         translate_StmtList(n->children[2]);
     }
 

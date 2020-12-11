@@ -27,6 +27,26 @@ Type::Type(Function* func) {
 }
 
 
+int Type::size() {
+    if (_size == 0) {
+        switch (this->category) {
+        case T_STRUCTURE:
+            for (auto i : *this->structure->fields) {
+                _size += i->type->size();
+            }
+            break;
+        case T_ARRAY:
+            _size = this->array->base->size() * this->array->size;
+            break;
+        default:
+            _size = 4;
+            break;
+        }
+    }
+    return _size;
+}
+
+
 Array::Array() {}
 
 

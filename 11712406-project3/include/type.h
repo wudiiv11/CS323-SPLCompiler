@@ -13,6 +13,8 @@ class Struct;
 class Function;
 
 class Type {
+private:
+    int _size = 0;
 
 public:
     string name;
@@ -36,6 +38,7 @@ public:
     Type(Function* func);
     bool operator== (const Type& t) const;
     bool isTypeOf(const string& name) const;
+    int size();
 };
 
 class Array {
