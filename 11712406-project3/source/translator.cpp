@@ -101,7 +101,6 @@ string Translator::new_label() {
 
 
 Expr::Expr() {}
-Expr::Expr(string id) : id(id) {}
 
 
 void Translator::translate_tree(Node* n) {
@@ -251,6 +250,10 @@ void Translator::translate_CompSt(Node* n) {
     } else if (n->children.size() == 4) {
         translate_DefList(n->children[1], fields);
         declare_size(fields);
+        cout << 111 << endl;
+        for (auto i : *fields) {
+            cout << i->name << i->type->size() << endl;
+        }
         translate_StmtList(n->children[2]);
     }
 
@@ -349,13 +352,15 @@ Expr* Translator::translate_Exp(Node* n, string place) {
     if (arg1 == "Exp") {
         string arg2 = n->children[1]->name;
         if (arg2 == "ASSIGN") {
-            string var = n->children[0]->children[0]->text;
-            Item* item = store.lookup(var);
-            string var_alias = item->alias;
-            string tp = new_place();
-            translate_Exp(n->children[2], tp);
-            codes.push_back(Record(Record::R_ASSIGN, 2, var_alias, tp));
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, var_alias));
+            // string var = n->children[0]->children[0]->text;
+            // string t0 = new_place();
+            // Expr* e = translate_Exp(n->children[0], t0);
+            // Item* item = store.lookup(var);
+            // string var_alias = item->alias;
+            // string tp = new_place();
+            // translate_Exp(n->children[2], tp);
+            // codes.push_back(Record(Record::R_ASSIGN, 2, var_alias, tp));
+            // codes.push_back(Record(Record::R_ASSIGN, 2, place, var_alias));
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
             string lb_2 = new_label();
@@ -400,7 +405,6 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             string var = n->children[0]->text;
             Item* item = store.lookup(var);
             codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
-            expr->id = n->children[0]->text;
             expr->t = item->t;
             expr->addr = "&" + item->alias;
         } else if (n->children[0]->text == "read") {

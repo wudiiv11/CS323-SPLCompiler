@@ -32,7 +32,6 @@ public:
 class Expr {
 
 public:
-    string id;
     string addr;
     Type* t;
 

@@ -36,7 +36,7 @@ int Type::size() {
             }
             break;
         case T_ARRAY:
-            _size = this->array->base->size() * this->array->size;
+            _size = this->array->base->size() * this->array->length;
             break;
         default:
             _size = 4;
@@ -50,9 +50,9 @@ int Type::size() {
 Array::Array() {}
 
 
-Array::Array(Type* base, int size) {
+Array::Array(Type* base, int length) {
     this->base = base;
-    this->size = size;
+    this->length = length;
 }
 
 

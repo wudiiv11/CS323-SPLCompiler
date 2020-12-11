@@ -45,10 +45,10 @@ class Array {
 
 public:
     Type* base;
-    int size;
+    int length;
 
     Array();
-    Array(Type* base, int size);
+    Array(Type* base, int lenght);
     bool operator== (const Array& arr) const;
 
 };
