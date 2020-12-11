@@ -100,7 +100,10 @@ string Translator::new_label() {
 }
 
 
-Expr::Expr() {}
+Expr::Expr() {
+    is_pointer = 0;
+    t = nullptr;
+}
 
 
 void Translator::translate_tree(Node* n) {
@@ -250,10 +253,6 @@ void Translator::translate_CompSt(Node* n) {
     } else if (n->children.size() == 4) {
         translate_DefList(n->children[1], fields);
         declare_size(fields);
-        cout << 111 << endl;
-        for (auto i : *fields) {
-            cout << i->name << i->type->size() << endl;
-        }
         translate_StmtList(n->children[2]);
     }
 
@@ -345,22 +344,19 @@ void Translator::translate_DefList(Node* n, vector<Field*>* fields) {
 }
 
 
-Expr* Translator::translate_Exp(Node* n, string place) {
+Expr* Translator::translate_Exp(Node* n, string& place) {
     Expr* expr = new Expr();
 
     string arg1 = n->children[0]->name;
     if (arg1 == "Exp") {
         string arg2 = n->children[1]->name;
         if (arg2 == "ASSIGN") {
-            // string var = n->children[0]->children[0]->text;
-            // string t0 = new_place();
-            // Expr* e = translate_Exp(n->children[0], t0);
-            // Item* item = store.lookup(var);
-            // string var_alias = item->alias;
-            // string tp = new_place();
-            // translate_Exp(n->children[2], tp);
-            // codes.push_back(Record(Record::R_ASSIGN, 2, var_alias, tp));
-            // codes.push_back(Record(Record::R_ASSIGN, 2, place, var_alias));
+            string t0 = new_place();
+            Expr* e = translate_Exp(n->children[0], t0);
+            string t1 = new_place();
+            translate_Exp(n->children[2], t1);
+            codes.push_back(Record(Record::R_ASSIGN, 2, t0, t1));
+            codes.push_back(Record(Record::R_ASSIGN, 2, place, t0));
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
             string lb_2 = new_label();
@@ -379,11 +375,14 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
         } else if (arg2 == "DOT") {
-            Expr* e = translate_Exp(n->children[0], new_place());
+            string tp = new_place();
+            Expr* e = translate_Exp(n->children[0], tp);
             int offset = e->t->structure->offset_of(n->children[2]->text);
             string addr = new_place();
             codes.push_back(Record(Record::R_OFFSET, 3, addr, e->addr, to_string(offset)));
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, "*" + addr));
+            place = "*" + addr;
+            // codes.push_back(Record(Record::R_ASSIGN, 2, place, "*" + addr));
+            // expr->addr = addr;
         }
     } else if (arg1 == "LP") {
         translate_Exp(n->children[1], place);
@@ -426,7 +425,8 @@ Expr* Translator::translate_Exp(Node* n, string place) {
             codes.push_back(Record(Record::R_CALL, 2, place, item->alias));
         }
     } else if (arg1 == "INT") {
-        codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
+        // codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
+        place = "#" + n->children[0]->text;
     }
 
     return expr;

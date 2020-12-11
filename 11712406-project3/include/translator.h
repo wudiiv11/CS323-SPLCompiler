@@ -34,6 +34,7 @@ class Expr {
 public:
     string addr;
     Type* t;
+    int is_pointer;
 
     Expr();
     Expr(string id);
@@ -76,7 +77,7 @@ public:
     void       translate_Def             (Node*, vector<Field*>*);
     void       translate_DecList         (Node*, Type*, vector<Field*>*);
     void       translate_Dec             (Node*, Type*, vector<Field*>*);
-    Expr*      translate_Exp             (Node*, string);
+    Expr*      translate_Exp             (Node*, string&);
     void       translate_Args            (Node*, vector<string>*);
     void       translate_cond_Exp        (Node*, string, string);
 };
