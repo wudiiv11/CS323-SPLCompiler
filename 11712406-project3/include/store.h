@@ -17,6 +17,7 @@ public:
 
     Type* t;
     string alias;
+    int is_pointer;
 
     Item();
 
@@ -33,7 +34,7 @@ public:
     Store();
     Item* lookup(string);
     Item* lookup(string, Type::CATEGORY c);
-    void insert(string, string alias, Type* type);
+    void insert(string, string alias, Type* type, int is_pointer);
     void add_scope();
     void sub_scope();
 

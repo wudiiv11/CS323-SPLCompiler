@@ -25,14 +25,14 @@ public:
         T_FUNCTION,
     } category;
     union {
-        string primitive;
-        Array *array;
+        string* primitive;
+        Array* array;
         Struct* structure;
-        Function *funcion;
+        Function* funcion;
     };
 
     Type();
-    Type(string primitive);
+    Type(string* primitive);
     Type(Array* array);
     Type(Struct* structure);
     Type(Function* func);

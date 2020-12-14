@@ -66,7 +66,7 @@ public:
     void       translate_ExtDecList      (Node*, Type*);
     Type*      translate_Specifier       (Node*);
     Struct*    translate_StructSpecifier (Node*);
-    Field*     translate_VarDec          (Node*, Type*);
+    Field*     translate_VarDec          (Node*, Type*, int);
     Function*  translate_FunDec          (Node*, Type*);
     void       translate_VarList         (Node*, vector<Field*>*);
     Field*     translate_ParamDec        (Node*);

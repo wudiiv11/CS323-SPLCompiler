@@ -3,7 +3,7 @@
 Type::Type() {}
 
 
-Type::Type(string primitive) {
+Type::Type(string* primitive) {
     category = T_PRIMITIVE;
     this->primitive = primitive;
 }

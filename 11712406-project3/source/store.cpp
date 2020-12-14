@@ -1,7 +1,10 @@
 #include "../include/store.h"
 #include <iostream>
 
-Item::Item() {}
+Item::Item() {
+    t = nullptr;
+    is_pointer = 0;
+}
 
 
 Store::Store() {
@@ -42,7 +45,7 @@ void Store::ensure_table_entry(string name) {
 }
 
 
-void Store::insert(string name, string alias, Type* type) {
+void Store::insert(string name, string alias, Type* type, int is_pointer=false) {
 
 #ifdef __DEBUG_
     cout << "insert " << name << endl;
@@ -52,6 +55,7 @@ void Store::insert(string name, string alias, Type* type) {
     Item* item = new Item();
     item->alias = alias;
     item->t = type;
+    item->is_pointer = is_pointer;
     table[name].push_front(item);
     scope.back()->push_back(name);
 }
