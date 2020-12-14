@@ -360,7 +360,6 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             string t1 = new_place();
             translate_Exp(n->children[2], t1);
             codes.push_back(Record(Record::R_ASSIGN, 2, t0, t1));
-            // codes.push_back(Record(Record::R_ASSIGN, 2, place, t0));
             place = t0;
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
@@ -379,7 +378,7 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             else if (arg2 == "MINUS") codes.push_back(Record(Record::R_MINUS, 3, place, tp1, tp2));
             else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
-            // 这里type的判断需要加一个函数, 暂时先默认为Int
+            // 这里type的判断需要加一个函数, 暂时先默认为第一个type
             expr->t = e1->t;
         } else if (arg2 == "DOT") {
             string tp = new_place();
@@ -388,8 +387,6 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             string addr = new_place();
             codes.push_back(Record(Record::R_OFFSET, 3, addr, e->addr, to_string(offset)));
             place = "*" + addr;
-            // codes.push_back(Record(Record::R_ASSIGN, 2, place, "*" + addr));
-            // expr->addr = addr;
         }
     } else if (arg1 == "LP") {
         translate_Exp(n->children[1], place);
@@ -412,7 +409,6 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             string var = n->children[0]->text;
             Item* item = store.lookup(var);
             place = item->alias;
-            // codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
             expr->t = item->t;
             if (item->is_pointer)
                 expr->addr = item->alias;
@@ -437,7 +433,6 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             codes.push_back(Record(Record::R_CALL, 2, place, item->alias));
         }
     } else if (arg1 == "INT") {
-        // codes.push_back(Record(Record::R_INT, 2, place, n->children[0]->text));
         place = "#" + n->children[0]->text;
         expr->t = new Type(new string("int"));
     }
