@@ -1,11 +1,20 @@
 FUNCTION main :
-DEC v3 8
-t3 := v3
-t4 := &v3 + #0
-*t4 := #1
-t1 := *t4
-t8 := v3
-t9 := &v3 + #4
-*t9 := #2
-t6 := *t9
+READ t3
+v1 := t3
+IF v1 > #0 GOTO label1
+GOTO label2
+LABEL label1 :
+WRITE #1
+GOTO label3
+LABEL label2 :
+IF v1 < #0 GOTO label4
+GOTO label5
+LABEL label4 :
+t11 := #0 - #1
+WRITE t11
+GOTO label6
+LABEL label5 :
+WRITE #0
+LABEL label6 :
+LABEL label3 :
 RETURN #0

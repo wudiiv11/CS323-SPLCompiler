@@ -356,7 +356,8 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             string t1 = new_place();
             translate_Exp(n->children[2], t1);
             codes.push_back(Record(Record::R_ASSIGN, 2, t0, t1));
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, t0));
+            // codes.push_back(Record(Record::R_ASSIGN, 2, place, t0));
+            place = t0;
         } else if (arg2 == "AND" || arg2 == "OR" || arg2 == "LT" || arg2 == "LE" || arg2 == "GT" || arg2 == "GE" || arg2 == "NE" || arg2 == "EQ") {
             string lb_1 = new_label();
             string lb_2 = new_label();
@@ -403,7 +404,8 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
         if (n->children.size() == 1) {
             string var = n->children[0]->text;
             Item* item = store.lookup(var);
-            codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
+            place = item->alias;
+            // codes.push_back(Record(Record::R_ASSIGN, 2, place, item->alias));                
             expr->t = item->t;
             expr->addr = "&" + item->alias;
         } else if (n->children[0]->text == "read") {
