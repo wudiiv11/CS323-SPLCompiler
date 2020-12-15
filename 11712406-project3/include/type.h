@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdarg>
 
 using namespace std;
 
@@ -84,6 +85,36 @@ public:
 
     Function();
     Function(string name, Type* ret, vector<Field*>* args);
+};
+
+class Record {
+
+public:
+    enum CATEGORY {
+        R_INT, R_ID, R_FUNCTION,
+        R_ASSIGN, R_OFFSET,
+        R_PLUS, R_MINUS, R_MUL, R_DIV,
+        R_LT, R_LE, R_GT, R_GE, R_NE, R_EQ,
+        R_WHILE, R_AND, R_OR,
+        R_GOTO, R_LABEL, R_READ, R_WRITE,
+        R_RETURN, R_CALL, R_PARAM, R_ARG, R_DEC,
+    } category;
+    vector<string> args;
+    Record(CATEGORY c, vector<string> args);
+    Record(CATEGORY c, int num, ...);
+
+    string to_string();
+};
+
+class Expr {
+
+public:
+    string addr;
+    Type* t;
+    int is_pointer;
+
+    Expr();
+    Expr(string id);
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include "../include/type.h"
 #include "../include/translator.h"
 
 #include <iostream>
@@ -8,82 +9,6 @@ int Translator::field_cnt = 0;
 int Translator::label_cnt = 0;
 
 Translator::Translator() {}
-
-Record::Record(CATEGORY c, vector<string> args) {
-    this->category = c;
-    this->args = args;
-}
-
-
-Record::Record(CATEGORY c, int num, ...) {
-    this->category = c;
-
-    va_list list;
-    va_start(list, num);
-
-    for (int i = 0; i < num; ++i) {
-        string* p = va_arg(list, string*);
-        args.push_back(*p);
-    }
-
-    va_end(list);
-}
-
-
-string Record::to_string() {
-    switch (category) {
-    case R_INT:
-        return args[0] + " := #" + args[1];
-    case R_ID:
-        return args[0] + " := " + args[1];
-    case R_ASSIGN:
-        return args[0] + " := " + args[1];
-    case R_OFFSET:
-        return args[0] + " := " + args[1] + " + #" + args[2];
-    case R_PLUS:
-        return args[0] + " := " + args[1] + " + " + args[2];
-    case R_MINUS:
-        return args[0] + " := " + args[1] + " - " + args[2];
-    case R_MUL:
-        return args[0] + " := " + args[1] + " * " + args[2];
-    case R_DIV:
-        return args[0] + " := " + args[1] + " / " + args[2];
-    case R_LT:
-        return "IF " + args[0] + " < " + args[1] + " GOTO " + args[2];
-    case R_LE:
-        return "IF " + args[0] + " <= " + args[1] + " GOTO " + args[2];
-    case R_GT:
-        return "IF " + args[0] + " > " + args[1] + " GOTO " + args[2];
-    case R_GE:
-        return "IF " + args[0] + " >= " + args[1] + " GOTO " + args[2];
-    case R_NE:
-        return "IF " + args[0] + " != " + args[1] + " GOTO " + args[2];
-    case R_EQ:
-        return "IF " + args[0] + " == " + args[1] + " GOTO " + args[2];
-    case R_GOTO:
-        return "GOTO " + args[0];
-    case R_LABEL:
-        return "LABEL " + args[0] + " :";
-    case R_RETURN:
-        return "RETURN " + args[0];
-    case R_FUNCTION:
-        return "FUNCTION " + args[0] + " :";
-    case R_PARAM:
-        return "PARAM " + args[0];
-    case R_READ:
-        return "READ " + args[0];
-    case R_WRITE:
-        return "WRITE " + args[0];
-    case R_CALL:
-        return args[0] + " := CALL " + args[1];
-    case R_ARG:
-        return "ARG " + args[0];
-    case R_DEC:
-        return "DEC " + args[0] + " " + args[1];
-    default:
-        return "error";
-    }
-}
 
 
 string Translator::new_place() {
@@ -98,12 +23,6 @@ string Translator::new_field() {
 
 string Translator::new_label() {
     return string("label" + to_string(++label_cnt));
-}
-
-
-Expr::Expr() {
-    is_pointer = 0;
-    t = nullptr;
 }
 
 
@@ -387,6 +306,19 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             string addr = new_place();
             codes.push_back(Record(Record::R_OFFSET, 3, addr, e->addr, to_string(offset)));
             place = "*" + addr;
+        } else if (arg2 == "LB") {
+            string tp1 = new_place();
+            string tp2 = new_place();
+            string tp3 = new_place();
+            string tp4 = new_place();
+            Expr* e1 = translate_Exp(n->children[0], tp1);
+            Expr* e2 = translate_Exp(n->children[2], tp2);
+            codes.push_back(Record(Record::R_MUL, 3, tp3, "#" + to_string(e1->t->array->base->size()), tp2));
+            codes.push_back(Record(Record::R_PLUS, 3, tp4, e1->addr, tp3));
+            
+            place = "*" + tp4;
+            expr->t = e1->t->array->base;
+            expr->addr = tp4;
         }
     } else if (arg1 == "LP") {
         translate_Exp(n->children[1], place);
