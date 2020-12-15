@@ -4,7 +4,6 @@
 #include "node.h"
 #include "store.h"
 #include "type.h"
-#include "optimizer.h"
 
 #include <vector>
 
@@ -17,7 +16,6 @@ private:
     static int label_cnt;
 
     Store store;
-    Optimizer optimizer;
     vector<Record> codes;
 
 public:
