@@ -28,12 +28,9 @@ string Translator::new_label() {
 void Translator::translate_tree(Node* n) {
     translate_Program(n);
 
-    // optimizer.optimize(&codes);
+    optimizer.optimize(&codes);
 
-    // for (auto i : *optimizer.codes)
-    //     cout << i.to_string() << endl;
-
-    for (auto i : codes) 
+    for (auto i : *optimizer.codes)
         cout << i.to_string() << endl;
 }
 
