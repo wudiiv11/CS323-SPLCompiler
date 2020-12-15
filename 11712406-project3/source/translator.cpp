@@ -27,7 +27,13 @@ string Translator::new_label() {
 
 void Translator::translate_tree(Node* n) {
     translate_Program(n);
-    for (auto i : codes)
+
+    // optimizer.optimize(&codes);
+
+    // for (auto i : *optimizer.codes)
+    //     cout << i.to_string() << endl;
+
+    for (auto i : codes) 
         cout << i.to_string() << endl;
 }
 
@@ -90,7 +96,6 @@ Struct* Translator::translate_StructSpecifier(Node* n) {
 
         store.add_scope();
         translate_DefList(n->children[3], fields);
-        declare_size(fields);
         store.sub_scope();
 
         ret = new Struct(name, fields);
@@ -298,13 +303,19 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
             // 这里type的判断需要加一个函数识别自动向上转型, 暂时先默认为第一个type
             expr->t = e1->t;
+            expr->is_pointer = e1->is_pointer || e2->is_pointer;
         } else if (arg2 == "DOT") {
             string tp = new_place();
             Expr* e = translate_Exp(n->children[0], tp);
-            int offset = e->t->structure->offset_of(n->children[2]->text);
+            string field = n->children[2]->text;
+            int offset = e->t->structure->offset_of(field);
             string addr = new_place();
             codes.push_back(Record(Record::R_OFFSET, 3, addr, e->addr, to_string(offset)));
             place = "*" + addr;
+            expr->addr = addr;
+            // 符号表中没有关于这个的信息, 从n.children[0]/*Struct对象*/里面获取n.children[2]的类型信息
+            expr->t = e->t->structure->type_of(field);
+            expr->is_pointer = 1;
         } else if (arg2 == "LB") {
             string tp1 = new_place();
             string tp2 = new_place();
@@ -318,14 +329,14 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             place = "*" + tp4;
             expr->t = e1->t->array->base;
             expr->addr = tp4;
+            expr->is_pointer = 1;
         }
     } else if (arg1 == "LP") {
-        translate_Exp(n->children[1], place);
+        expr = translate_Exp(n->children[1], place);
     } else if (arg1 == "MINUS") {
         string tp = new_place();
-        Expr* e = translate_Exp(n->children[1], tp);
+        expr = translate_Exp(n->children[1], tp);
         codes.push_back(Record(Record::R_MINUS, 3, place, string("#0"), tp));
-        expr = e;
     } else if (arg1 == "NOT") {
         string lb_1 = new_label();
         string lb_2 = new_label();
@@ -342,9 +353,9 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             place = item->alias;
             expr->t = item->t;
             expr->is_pointer = item->is_pointer;
-            if (item->is_pointer)
+            if (item->is_pointer) 
                 expr->addr = item->alias;
-            else
+            else 
                 expr->addr = "&" + item->alias;
         } else if (n->children[0]->text == "read") {
             codes.push_back(Record(Record::R_READ, 1, place));
@@ -376,7 +387,9 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
 void Translator::translate_Args(Node* n, vector<string>* args) {
     string tp = new_place();
     Expr* e = translate_Exp(n->children[0], tp);
-    if (e->t->category != Type::T_PRIMITIVE && !e->is_pointer)
+    if (e->is_pointer) 
+        tp = e->addr;
+    else if (e->t->category != Type::T_PRIMITIVE)
         tp = "&" + tp;
     args->push_back(tp);
     if (n->children.size() > 1)

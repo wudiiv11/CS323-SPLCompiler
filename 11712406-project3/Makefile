@@ -4,7 +4,7 @@ BISON=bison
 
 
 target=bin/splc
-src=source/node.cpp source/translator.cpp source/store.cpp source/type.cpp syntax.tab.c
+src=source/node.cpp source/translator.cpp source/store.cpp source/type.cpp source/optimizer.cpp syntax.tab.c
 cflags=-std=c++11 -lfl -ly
 
 .lex: lex.l

@@ -4,6 +4,7 @@
 #include "node.h"
 #include "store.h"
 #include "type.h"
+#include "optimizer.h"
 
 #include <vector>
 
@@ -16,12 +17,15 @@ private:
     static int label_cnt;
 
     Store store;
+    Optimizer optimizer;
     vector<Record> codes;
 
 public:
     string     new_place();
     string     new_field();
     string     new_label();
+
+    vector<Record>* get_codes();
 
     Translator();
 

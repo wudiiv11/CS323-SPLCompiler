@@ -71,14 +71,24 @@ Struct::Struct(string name, vector<Field*>* fields) {
 }
 
 int Struct::offset_of(string field) {
-    int cnt = 0;
+    int offset = 0;
     for (auto i : *fields) {
         if (i->name == field) {
-            return cnt << 2;
+            return offset;
         }
-        cnt += 1;
+        offset += i->type->size();
     }
     return -1;
+}
+
+
+Type* Struct::type_of(string name) {
+    for (auto s : *fields) {
+        if (s->name == name) {
+            return s->type;
+        }
+    }
+    return nullptr;
 }
 
 
