@@ -1,4 +1,3 @@
-#include "../include/type.h"
 #include "../include/translator.h"
 
 #include <iostream>
@@ -297,7 +296,7 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             else if (arg2 == "MINUS") codes.push_back(Record(Record::R_MINUS, 3, place, tp1, tp2));
             else if (arg2 == "MUL") codes.push_back(Record(Record::R_MUL, 3, place, tp1, tp2));
             else if (arg2 == "DIV") codes.push_back(Record(Record::R_DIV, 3, place, tp1, tp2));
-            // 这里type的判断需要加一个函数, 暂时先默认为第一个type
+            // 这里type的判断需要加一个函数识别自动向上转型, 暂时先默认为第一个type
             expr->t = e1->t;
         } else if (arg2 == "DOT") {
             string tp = new_place();
@@ -342,6 +341,7 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
             Item* item = store.lookup(var);
             place = item->alias;
             expr->t = item->t;
+            expr->is_pointer = item->is_pointer;
             if (item->is_pointer)
                 expr->addr = item->alias;
             else
@@ -376,7 +376,7 @@ Expr* Translator::translate_Exp(Node* n, string& place) {
 void Translator::translate_Args(Node* n, vector<string>* args) {
     string tp = new_place();
     Expr* e = translate_Exp(n->children[0], tp);
-    if (e->t->category != Type::T_PRIMITIVE)
+    if (e->t->category != Type::T_PRIMITIVE && !e->is_pointer)
         tp = "&" + tp;
     args->push_back(tp);
     if (n->children.size() > 1)
@@ -400,7 +400,6 @@ void Translator::translate_cond_Exp(Node* n, string lb_t, string lb_f) {
         translate_Exp(n->children[0], tp1);
         translate_Exp(n->children[2], tp2);
 
-        // 这里可以包装成一个函数
         if (op == "LT") codes.push_back(Record(Record::R_LT, 3, tp1, tp2, lb_t));
         if (op == "LE") codes.push_back(Record(Record::R_LE, 3, tp1, tp2, lb_t));
         if (op == "GT") codes.push_back(Record(Record::R_GT, 3, tp1, tp2, lb_t));
